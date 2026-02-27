@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Timer, CheckCircle } from 'lucide-react';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout';
 import { socketService } from '@/services/socketService';
 import { toast } from '@/hooks/use-toast';
 
@@ -150,7 +150,7 @@ export const StudentQuizPage: React.FC = () => {
   if (!currentQuestion) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-[#605BEF]">
-        <div className="text-white text-xl">Carregando quest\u00e3o...</div>
+        <div className="text-white text-xl">Carregando questao...</div>
       </div>
     );
   }
@@ -158,15 +158,7 @@ export const StudentQuizPage: React.FC = () => {
   const progress = ((questionIndex + 1) / totalQuestions) * 100;
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="w-full max-w-4xl">
           {/* Header com timer e progresso */}
@@ -263,6 +255,6 @@ export const StudentQuizPage: React.FC = () => {
           )}
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
