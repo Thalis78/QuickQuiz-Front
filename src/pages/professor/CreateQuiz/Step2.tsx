@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronUp, ChevronDown, X } from 'lucide-react';
-import { Header } from '@/components/Header';
 import { useQuiz, QuizQuestion } from '@/contexts/QuizContext';
 import { toast } from '@/hooks/use-toast';
+import { Layout } from "@/components/layout";
 
 export const CreateQuizStep2: React.FC = () => {
   const navigate = useNavigate();
@@ -13,12 +13,12 @@ export const CreateQuizStep2: React.FC = () => {
   const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(null);
   
   // Estado do formulário do modal
-  const [enunciado, setEnunciado] = useState('');
-  const [alternativaA, setAlternativaA] = useState('');
-  const [alternativaB, setAlternativaB] = useState('');
-  const [alternativaC, setAlternativaC] = useState('');
-  const [alternativaD, setAlternativaD] = useState('');
-  const [respostaCorreta, setRespostaCorreta] = useState<'A' | 'B' | 'C' | 'D' | ''>('');
+  const [enunciado, setEnunciado] = useState("");
+  const [alternativaA, setAlternativaA] = useState("");
+  const [alternativaB, setAlternativaB] = useState("");
+  const [alternativaC, setAlternativaC] = useState("");
+  const [alternativaD, setAlternativaD] = useState("");
+  const [respostaCorreta, setRespostaCorreta] = useState<"A" | "B" | "C" | "D" | "">("");
 
   const questoes = currentQuiz?.questoes || [];
 
@@ -26,13 +26,13 @@ export const CreateQuizStep2: React.FC = () => {
     if (question) {
       setEditingQuestion(question);
       setEnunciado(question.enunciado);
-      setAlternativaA(question.alternativas[0]?.texto || '');
-      setAlternativaB(question.alternativas[1]?.texto || '');
-      setAlternativaC(question.alternativas[2]?.texto || '');
-      setAlternativaD(question.alternativas[3]?.texto || '');
+      setAlternativaA(question.alternativas[0]?.texto || "");
+      setAlternativaB(question.alternativas[1]?.texto || "");
+      setAlternativaC(question.alternativas[2]?.texto || "");
+      setAlternativaD(question.alternativas[3]?.texto || "");
       
       const corretaIndex = question.alternativas.findIndex(a => a.correta);
-      setRespostaCorreta(corretaIndex >= 0 ? String.fromCharCode(65 + corretaIndex) as 'A' | 'B' | 'C' | 'D' : '');
+      setRespostaCorreta(corretaIndex >= 0 ? String.fromCharCode(65 + corretaIndex) as "A" | "B" | "C" | "D" : "");
     } else {
       resetForm();
     }
@@ -41,12 +41,12 @@ export const CreateQuizStep2: React.FC = () => {
 
   const resetForm = () => {
     setEditingQuestion(null);
-    setEnunciado('');
-    setAlternativaA('');
-    setAlternativaB('');
-    setAlternativaC('');
-    setAlternativaD('');
-    setRespostaCorreta('');
+    setEnunciado("");
+    setAlternativaA("");
+    setAlternativaB("");
+    setAlternativaC("");
+    setAlternativaD("");
+    setRespostaCorreta("");
   };
 
   const closeModal = () => {
@@ -58,27 +58,27 @@ export const CreateQuizStep2: React.FC = () => {
     // Validações
     if (!enunciado.trim()) {
       toast({
-        title: 'Enunciado obrigatório',
-        description: 'Digite a pergunta.',
-        variant: 'destructive',
+        title: "Enunciado obrigatório",
+        description: "Digite a pergunta.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!alternativaA.trim() || !alternativaB.trim() || !alternativaC.trim() || !alternativaD.trim()) {
       toast({
-        title: 'Alternativas incompletas',
-        description: 'Preencha todas as 4 alternativas.',
-        variant: 'destructive',
+        title: "Alternativas incompletas",
+        description: "Preencha todas as 4 alternativas.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!respostaCorreta) {
       toast({
-        title: 'Resposta correta não selecionada',
-        description: 'Marque qual alternativa é a correta.',
-        variant: 'destructive',
+        title: "Resposta correta não selecionada",
+        description: "Marque qual alternativa é a correta.",
+        variant: "destructive",
       });
       return;
     }
@@ -87,24 +87,24 @@ export const CreateQuizStep2: React.FC = () => {
       id: editingQuestion?.id || `q_${Date.now()}`,
       enunciado: enunciado.trim(),
       alternativas: [
-        { texto: alternativaA.trim(), correta: respostaCorreta === 'A' },
-        { texto: alternativaB.trim(), correta: respostaCorreta === 'B' },
-        { texto: alternativaC.trim(), correta: respostaCorreta === 'C' },
-        { texto: alternativaD.trim(), correta: respostaCorreta === 'D' },
+        { texto: alternativaA.trim(), correta: respostaCorreta === "A" },
+        { texto: alternativaB.trim(), correta: respostaCorreta === "B" },
+        { texto: alternativaC.trim(), correta: respostaCorreta === "C" },
+        { texto: alternativaD.trim(), correta: respostaCorreta === "D" },
       ],
-      tipo: 'texto',
+      tipo: "texto",
     };
 
     if (editingQuestion) {
       updateQuestion(editingQuestion.id, newQuestion);
       toast({
-        title: 'Questão atualizada!',
-        description: 'A questão foi editada com sucesso.',
+        title: "Questão atualizada!",
+        description: "A questão foi editada com sucesso.",
       });
     } else {
       addQuestion(newQuestion);
       toast({
-        title: 'Questão adicionada!',
+        title: "Questão adicionada!",
         description: 'Nova questão criada com sucesso.',
       });
     }
@@ -113,51 +113,42 @@ export const CreateQuizStep2: React.FC = () => {
   };
 
   const handleDeleteQuestion = (id: string) => {
-    if (confirm('Tem certeza que deseja apagar esta questão?')) {
+    if (confirm("Tem certeza que deseja apagar esta questão?")) {
       deleteQuestion(id);
       toast({
-        title: 'Questão removida',
-        description: 'A questão foi deletada.',
+        title: "Questão removida",
+        description: "A questão foi deletada.",
       });
     }
   };
 
-  const handleMoveQuestion = (index: number, direction: 'up' | 'down') => {
-    if (direction === 'up' && index === 0) return;
-    if (direction === 'down' && index === questoes.length - 1) return;
+  const handleMoveQuestion = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === questoes.length - 1) return;
 
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
     reorderQuestions(index, targetIndex);
   };
 
   const handleVoltar = () => {
-    navigate('/professor/quiz/criar/etapa-1');
+    navigate("/professor/quiz/criar/etapa-1");
   };
 
   const handleProximaEtapa = () => {
     if (questoes.length === 0) {
       toast({
-        title: 'Adicione questões',
-        description: 'Você precisa adicionar pelo menos 1 questão.',
-        variant: 'destructive',
+        title: "Adicione questões",
+        description: "Você precisa adicionar pelo menos 1 questão.",
+        variant: "destructive",
       });
       return;
     }
 
-    navigate('/professor/quiz/criar/etapa-3');
+    navigate("/professor/quiz/criar/etapa-3");
   };
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      {/* Background */}
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         {/* Título */}
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
@@ -417,6 +408,6 @@ export const CreateQuizStep2: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   );
 };

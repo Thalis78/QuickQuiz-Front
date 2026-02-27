@@ -1,8 +1,8 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { useQuiz } from '@/contexts/QuizContext';
-import { toast } from '@/hooks/use-toast';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuiz } from "@/contexts/QuizContext";
+import { toast } from "@/hooks/use-toast";
+import { Layout } from "@/components/layout"
 
 export const CreateQuizStep3: React.FC = () => {
   const navigate = useNavigate();
@@ -12,44 +12,35 @@ export const CreateQuizStep3: React.FC = () => {
   const config = currentQuiz?.config;
 
   const handleVoltar = () => {
-    navigate('/professor/quiz/criar/etapa-2');
+    navigate("/professor/quiz/criar/etapa-2");
   };
 
   const handleConfirmar = () => {
     if (!currentQuiz) {
       toast({
-        title: 'Erro',
-        description: 'Nenhum quiz encontrado para salvar.',
-        variant: 'destructive',
+        title: "Erro",
+        description: "Nenhum quiz encontrado para salvar.",
+        variant: "destructive",
       });
       return;
     }
 
     saveQuiz();
     toast({
-      title: 'Quiz criado com sucesso!',
-      description: 'Seu quiz foi salvo e está pronto para ser usado.',
+      title: "Quiz criado com sucesso!",
+      description: "Seu quiz foi salvo e está pronto para ser usado.",
     });
-    navigate('/professor/dashboard');
+    navigate("/professor/dashboard");
   };
 
   const handleCancelar = () => {
-    if (confirm('Tem certeza que deseja cancelar? Todas as alterações serão perdidas.')) {
-      navigate('/professor/dashboard');
+    if (confirm("Tem certeza que deseja cancelar? Todas as alterações serão perdidas.")) {
+      navigate("/professor/dashboard");
     }
   };
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      {/* Background */}
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         {/* Título */}
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
@@ -168,6 +159,6 @@ export const CreateQuizStep3: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
