@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { useQuiz } from '@/contexts/QuizContext';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuiz } from "@/contexts/QuizContext";
+import { toast } from "@/hooks/use-toast";
+import { Layout } from "@/components/layout";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
   const { currentQuiz, setConfig } = useQuiz();
   
-  const [titulo, setTitulo] = useState('');
-  const [nivel, setNivel] = useState(currentQuiz?.config.nivel || 'A1');
+  const [titulo, setTitulo] = useState("");
+  const [nivel, setNivel] = useState(currentQuiz?.config.nivel || "A1");
   const [categorias, setCategorias] = useState(
     currentQuiz?.config.categorias || {
       texto: false,
@@ -18,8 +18,8 @@ export const CreateQuizStep1: React.FC = () => {
       misturado: true
     }
   );
-  const [tempo, setTempo] = useState(currentQuiz?.config.tempoPorQuestao?.toString() || '30');
-  const [quantidade, setQuantidade] = useState(currentQuiz?.config.quantidadeQuestoes?.toString() || '5');
+  const [tempo, setTempo] = useState(currentQuiz?.config.tempoPorQuestao?.toString() || "30");
+  const [quantidade, setQuantidade] = useState(currentQuiz?.config.quantidadeQuestoes?.toString() || "5");
 
   const handleCategoriaToggle = (categoria: keyof typeof categorias) => {
     setCategorias(prev => ({
@@ -31,9 +31,9 @@ export const CreateQuizStep1: React.FC = () => {
   const handleProximaEtapa = () => {
     if (!titulo.trim()) {
       toast({
-        title: 'Título obrigatório',
-        description: 'Por favor, digite um título para o quiz.',
-        variant: 'destructive',
+        title: "Título obrigatório",
+        description: "Por favor, digite um título para o quiz.",
+        variant: "destructive",
       });
       return;
     }
@@ -43,18 +43,18 @@ export const CreateQuizStep1: React.FC = () => {
 
     if (!tempoNum || tempoNum <= 0) {
       toast({
-        title: 'Tempo inválido',
-        description: 'O tempo por questão deve ser maior que 0.',
-        variant: 'destructive',
+        title: "Tempo inválido",
+        description: "O tempo por questão deve ser maior que 0.",
+        variant: "destructive",
       });
       return;
     }
 
     if (!quantidadeNum || quantidadeNum <= 0) {
       toast({
-        title: 'Quantidade inválida',
-        description: 'A quantidade de questões deve ser maior que 0.',
-        variant: 'destructive',
+        title: "Quantidade inválida",
+        description: "A quantidade de questões deve ser maior que 0.",
+        variant: "destructive",
       });
       return;
     }
@@ -62,9 +62,9 @@ export const CreateQuizStep1: React.FC = () => {
     const algumaSelecionada = Object.values(categorias).some(v => v);
     if (!algumaSelecionada) {
       toast({
-        title: 'Categoria obrigatória',
-        description: 'Selecione pelo menos uma categoria.',
-        variant: 'destructive',
+        title: "Categoria obrigatória",
+        description: "Selecione pelo menos uma categoria.",
+        variant: "destructive",
       });
       return;
     }
@@ -78,23 +78,15 @@ export const CreateQuizStep1: React.FC = () => {
     });
 
     toast({
-      title: 'Configurações salvas!',
-      description: 'Agora adicione as questões do quiz.',
+      title: "Configurações salvas!",
+      description: "Agora adicione as questões do quiz.",
     });
 
-    navigate('/professor/quiz/criar/etapa-2');
+    navigate("/professor/quiz/criar/etapa-2");
   };
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
           Criar Quiz
@@ -257,6 +249,6 @@ export const CreateQuizStep1: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
