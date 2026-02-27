@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { Copy, Users, Play, X, ArrowRight, CheckCircle } from 'lucide-react';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useQuiz } from '@/contexts/QuizContext';
 import { socketService } from '@/services/socketService';
@@ -177,15 +177,7 @@ export const QuizRoomPage: React.FC = () => {
   }
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
           {isPlaying ? `Quiz em Andamento - Questão ${currentQuestionIndex + 1}/${quiz.questoes.length}` : 'Sala de Espera'}
@@ -400,6 +392,6 @@ export const QuizRoomPage: React.FC = () => {
         cancelText="Cancelar"
         variant="danger"
       />
-    </div>
+    </Layout>
   );
 };

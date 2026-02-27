@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Trophy, Medal, Award, Home } from 'lucide-react';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/layout';
 
 interface Result {
   id: string;
@@ -76,15 +76,7 @@ export const StudentResultsPage: React.FC = () => {
   const percentage = Math.round((myResult.score / myResult.totalQuestions) * 100);
 
   return (
-    <div className="w-full min-h-screen relative bg-[#605BEF]">
-      <div className="fixed inset-0 w-full h-full z-0">
-        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
-      </div>
-
-      <div className="relative z-10">
-        <Header />
-      </div>
-
+    <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="w-full max-w-5xl">
           <h1 className="text-white text-center text-4xl font-bold mb-8">
@@ -187,6 +179,6 @@ export const StudentResultsPage: React.FC = () => {
           </div>
         </div>
       </main>
-    </div>
+    </Layout>
   );
 };
