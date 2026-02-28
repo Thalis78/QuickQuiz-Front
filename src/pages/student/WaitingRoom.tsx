@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Users, Clock, BookOpen, LogOut, Info } from 'lucide-react';
+import { Users, Clock, BookOpen, LogOut } from 'lucide-react';
+import { Header } from '@/components/Header';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { socketService } from '@/services/socketService';
 import { toast } from 'sonner';
-import { Layout } from "@/components/layout";
 
 interface QuizConfig {
   nivel: string;
@@ -40,6 +40,7 @@ export const StudentWaitingRoom: React.FC = () => {
       return;
     }
 
+    // Recupera dados do sessionStorage
     const storedStudentId = sessionStorage.getItem('studentId');
     const storedStudentName = sessionStorage.getItem('studentName');
     const storedRoomCode = sessionStorage.getItem('roomCode');
@@ -53,15 +54,18 @@ export const StudentWaitingRoom: React.FC = () => {
     setStudentId(storedStudentId);
     setStudentName(storedStudentName);
 
+    // Recupera dados do quiz do sessionStorage (foram salvos no join-room)
     const storedQuiz = sessionStorage.getItem('quizData');
     if (storedQuiz) {
       try {
-        setQuiz(JSON.parse(storedQuiz));
+        const parsedQuiz = JSON.parse(storedQuiz);
+        setQuiz(parsedQuiz);
       } catch (error) {
         console.error('Erro ao parsear quiz:', error);
       }
     }
     
+    // Recupera lista inicial de alunos
     const storedStudentsList = sessionStorage.getItem('studentsList');
     if (storedStudentsList) {
       try {
@@ -73,22 +77,36 @@ export const StudentWaitingRoom: React.FC = () => {
       }
     }
 
-    // Socket Listeners
+    // Listeners Socket.IO
     socketService.onStudentJoined((data) => {
       setTotalStudents(data.totalStudents);
-      setStudents(prev => {
-        const exists = prev.some(s => s.id === data.student.id);
-        if (exists) return prev;
-        return [...prev, data.student];
-      });
+      
+      // Adiciona aluno à lista se não for ele mesmo
       if (data.student.id !== storedStudentId) {
+        setStudents(prev => {
+          // Verifica se já existe
+          const exists = prev.some(s => s.id === data.student.id);
+          if (exists) return prev;
+          return [...prev, data.student];
+        });
+        
         toast.success(`${data.student.name} entrou na sala.`);
+      } else {
+        // Se for o próprio aluno, adiciona à lista
+        setStudents(prev => {
+          const exists = prev.some(s => s.id === data.student.id);
+          if (exists) return prev;
+          return [...prev, data.student];
+        });
       }
     });
 
     socketService.onStudentLeft((data) => {
       setTotalStudents(data.totalStudents);
+      
+      // Remove aluno da lista
       setStudents(prev => prev.filter(s => s.id !== data.studentId));
+      
       if (data.studentId !== storedStudentId) {
         toast.info(`${data.studentName} saiu da sala.`);
       }
@@ -96,7 +114,12 @@ export const StudentWaitingRoom: React.FC = () => {
 
     socketService.onQuizStarted((data) => {
       toast.success('Quiz iniciado! Boa sorte!');
-      navigate(`/aluno/quiz/${code}`, { state: { questionData: data } });
+      // Navega passando os dados da primeira questão
+      navigate(`/aluno/quiz/${code}`, { 
+        state: { 
+          questionData: data 
+        } 
+      });
     });
 
     socketService.onRoomClosed(() => {
@@ -114,144 +137,179 @@ export const StudentWaitingRoom: React.FC = () => {
 
   const handleLeaveRoom = () => {
     if (!code || !studentId) return;
+
     socketService.leaveRoom(code, studentId);
-    toast.success('Você saiu da sala.');
-    sessionStorage.clear();
+    
+    toast.success('Você saiu da sala. Até logo!');
+    
+    sessionStorage.removeItem('studentId');
+    sessionStorage.removeItem('studentName');
+    sessionStorage.removeItem('roomCode');
+    
     navigate('/');
   };
 
   if (!studentName) {
     return (
-      <Layout>
-        <div className="flex items-center justify-center pt-32">
-          <div className="text-[#605BEF] text-xl font-bold animate-bounce">Carregando sala...</div>
-        </div>
-      </Layout>
+      <div className="w-full min-h-screen flex items-center justify-center bg-[#605BEF]">
+        <div className="text-white text-xl">Carregando...</div>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <main className="flex flex-col items-center px-4 pt-32 pb-12">
-        <div className="w-full max-w-4xl space-y-6">
-          
-          {/* Card de Status Principal */}
-          <div className="bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
+    <div className="w-full min-h-screen relative bg-[#605BEF]">
+      <div className="fixed inset-0 w-full h-full z-0">
+        <img src="/bg.svg" alt="Background" className="w-full h-full object-cover" />
+      </div>
+
+      <div className="relative z-10">
+        <Header />
+      </div>
+
+      <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
+        <div className="w-full max-w-4xl">
+          {/* Card Principal */}
+          <div className="bg-white rounded-3xl p-8 shadow-2xl mb-6">
+            {/* Status */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-6 py-2 rounded-full font-bold text-sm md:text-base mb-6 border border-amber-200">
-                <Clock size={20} className="animate-pulse" />
-                AGUARDANDO O PROFESSOR INICIAR...
+              <div className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-6 py-3 rounded-full font-bold text-lg mb-4">
+                <Clock size={24} className="animate-pulse" />
+                Aguardando o professor...
               </div>
               
               <h1 className="text-3xl font-bold text-[#605BEF] mb-2">
                 Sala de Espera
               </h1>
               <p className="text-gray-600">
-                Prepare-se, <span className="font-bold text-[#4441AA]">{studentName}</span>! O desafio começará em breve.
+                Olá, <strong>{studentName}</strong>! Aguarde o início do quiz.
               </p>
             </div>
 
             {/* Info do Quiz */}
             {quiz && (
-              <div className="bg-[#605BEF] rounded-xl p-6 text-white mb-8 shadow-inner">
-                <div className="flex items-center gap-3 mb-6 border-b border-white/20 pb-4">
-                  <BookOpen size={24} />
-                  <h2 className="text-xl font-bold uppercase tracking-tight">
+              <div className="bg-gradient-to-br from-[#605BEF] to-[#7B73E8] rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <BookOpen size={28} />
+                  <h2 className="text-2xl font-bold">
                     {quiz.config.titulo}
                   </h2>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">Nível</p>
-                    <p className="text-lg font-bold">{quiz.config.nivel}</p>
+                  <div className="bg-white/20 rounded-xl p-4 text-center">
+                    <p className="text-white/80 text-sm mb-1">Nível</p>
+                    <p className="text-xl font-bold">{quiz.config.nivel}</p>
                   </div>
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">Questões</p>
-                    <p className="text-lg font-bold">{quiz.questoes.length}</p>
+                  
+                  <div className="bg-white/20 rounded-xl p-4 text-center">
+                    <p className="text-white/80 text-sm mb-1">Total de Questões</p>
+                    <p className="text-xl font-bold">{quiz.questoes.length}</p>
                   </div>
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">Tempo/Questão</p>
-                    <p className="text-lg font-bold">{quiz.config.tempoPorQuestao}s</p>
+                  
+                  <div className="bg-white/20 rounded-xl p-4 text-center">
+                    <p className="text-white/80 text-sm mb-1">Tempo por Questão</p>
+                    <p className="text-xl font-bold">{quiz.config.tempoPorQuestao}s</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Lista de participantes */}
-            <div className="bg-white border-2 border-gray-100 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <Users size={22} className="text-[#605BEF]" />
-                  <h3 className="text-lg font-bold text-gray-800">
-                    Participantes na Sala
-                  </h3>
-                </div>
-                <span className="bg-[#605BEF] text-white px-3 py-1 rounded-full text-sm font-bold">
-                  {totalStudents} conectados
-                </span>
+            <div className="border-t border-gray-200 pt-6">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Users size={24} className="text-[#605BEF]" />
+                <h3 className="text-xl font-bold text-[#605BEF]">
+                  Participantes ({totalStudents})
+                </h3>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                {students.map((student) => (
-                  <div 
-                    key={student.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                      student.id === studentId 
-                        ? 'bg-indigo-50 border-[#605BEF] ring-1 ring-[#605BEF]' 
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      student.id === studentId ? 'bg-[#605BEF] text-white' : 'bg-gray-300 text-gray-600'
-                    }`}>
-                      {student.name.charAt(0).toUpperCase()}
+              {students.length === 0 ? (
+                <div className="text-center py-8 text-gray-600">
+                  <p>Carregando lista de alunos...</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {students.map((student, index) => (
+                    <div 
+                      key={student.id}
+                      className={`flex items-center gap-3 p-3 rounded-lg ${
+                        student.id === studentId 
+                          ? 'bg-[#605BEF] text-white' 
+                          : 'bg-gray-100'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                        student.id === studentId 
+                          ? 'bg-white text-[#605BEF]' 
+                          : 'bg-[#605BEF] text-white'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-semibold ${
+                          student.id === studentId ? 'text-white' : 'text-gray-800'
+                        }`}>
+                          {student.name}
+                          {student.id === studentId && ' (Você)'}
+                        </p>
+                      </div>
                     </div>
-                    <p className={`font-semibold truncate ${student.id === studentId ? 'text-[#605BEF]' : 'text-gray-700'}`}>
-                      {student.name} {student.id === studentId && <span className="text-[10px] font-normal">(Você)</span>}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Card de Instruções */}
-          <div className="bg-white/80 rounded-2xl p-6 border-2 border-dashed border-[#605BEF]/40 shadow-sm flex gap-4">
-            <div className="bg-[#605BEF]/10 p-3 rounded-full h-fit">
-              <Info className="text-[#605BEF]" size={24} />
-            </div>
-            <div>
-              <h3 className="font-bold text-[#605BEF] mb-1">Dica Importante:</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                Mantenha esta tela aberta. Assim que o professor iniciar o quiz, você será levado automaticamente para a primeira pergunta. <strong>Prepare sua conexão!</strong>
-              </p>
-            </div>
+          {/* Instruções */}
+          <div className="bg-white/90 rounded-2xl p-6 shadow-lg mb-6">
+            <h3 className="text-lg font-bold text-[#605BEF] mb-3">
+              📋 Instruções
+            </h3>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-start gap-2">
+                <span className="text-[#605BEF] font-bold">1.</span>
+                <span>Aguarde o professor iniciar o quiz.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#605BEF] font-bold">2.</span>
+                <span>Mantenha esta janela aberta.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#605BEF] font-bold">3.</span>
+                <span>Quando o quiz começar, você será redirecionado automaticamente.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#605BEF] font-bold">4.</span>
+                <span>Responda todas as questões dentro do tempo limite.</span>
+              </li>
+            </ul>
           </div>
 
           {/* Botão de sair */}
-          <div className="flex justify-center">
+          <div className="text-center">
             <button
               onClick={() => setLeaveModal(true)}
-              className="group text-gray-500 hover:text-red-500 font-medium transition-colors flex items-center gap-2"
+              className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors inline-flex items-center gap-2"
             >
-              <LogOut size={18} className="group-hover:translate-x-[-2px] transition-transform" />
-              Sair desta sala
+              <LogOut size={20} />
+              Sair da Sala
             </button>
           </div>
         </div>
       </main>
 
+      {/* Modal de confirmação para sair */}
       <ConfirmModal
         isOpen={leaveModal}
         onClose={() => setLeaveModal(false)}
         onConfirm={handleLeaveRoom}
         title="Sair da Sala"
-        description="Deseja realmente sair da espera? Você perderá sua conexão com este quiz."
-        confirmText="Sair Agora"
-        cancelText="Continuar Esperando"
+        description="Tem certeza que deseja sair da sala de espera? Você precisará entrar novamente com o código."
+        confirmText="Sair"
+        cancelText="Cancelar"
         variant="danger"
       />
-    </Layout>
+    </div>
   );
 };
