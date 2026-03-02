@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { toast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout";
+import { FormToggle, FormField, FormInput } from "@/components/formComponents";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
@@ -26,52 +27,24 @@ export const CreateQuizStep1: React.FC = () => {
   );
 
   const handleCategoriaToggle = (categoria: keyof typeof categorias) => {
-    setCategorias((prev) => ({
-      ...prev,
-      [categoria]: !prev[categoria],
-    }));
+    setCategorias((prev) => ({ ...prev, [categoria]: !prev[categoria] }));
   };
 
   const handleProximaEtapa = () => {
-    if (!titulo.trim()) {
-      toast({
-        title: "Título obrigatório",
-        description: "Por favor, digite um título para o quiz.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const tempoNum = parseInt(tempo);
     const quantidadeNum = parseInt(quantidade);
 
-    if (!tempoNum || tempoNum <= 0) {
-      toast({
-        title: "Tempo inválido",
-        description: "O tempo por questão deve ser maior que 0.",
+    if (!titulo.trim())
+      return toast({ title: "Título obrigatório", variant: "destructive" });
+    if (!tempoNum || tempoNum <= 0)
+      return toast({ title: "Tempo inválido", variant: "destructive" });
+    if (!quantidadeNum || quantidadeNum <= 0)
+      return toast({ title: "Quantidade inválida", variant: "destructive" });
+    if (!Object.values(categorias).some((v) => v))
+      return toast({
+        title: "Selecione uma categoria",
         variant: "destructive",
       });
-      return;
-    }
-
-    if (!quantidadeNum || quantidadeNum <= 0) {
-      toast({
-        title: "Quantidade inválida",
-        description: "A quantidade de questões deve ser maior que 0.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const algumaSelecionada = Object.values(categorias).some((v) => v);
-    if (!algumaSelecionada) {
-      toast({
-        title: "Categoria obrigatória",
-        description: "Selecione pelo menos uma categoria.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setConfig({
       nivel,
@@ -80,12 +53,7 @@ export const CreateQuizStep1: React.FC = () => {
       quantidadeQuestoes: quantidadeNum,
       titulo,
     });
-
-    toast({
-      title: "Configurações salvas!",
-      description: "Agora adicione as questões do quiz.",
-    });
-
+    toast({ title: "Configurações salvas!" });
     navigate("/professor/quiz/criar/etapa-2");
   };
 
@@ -98,147 +66,66 @@ export const CreateQuizStep1: React.FC = () => {
 
         <div className="w-full max-w-3xl bg-[#3E3B7A] rounded-3xl p-8 shadow-2xl">
           <div className="text-white text-2xl font-bold mb-6">1 / 3</div>
-
           <h2 className="text-white text-center text-3xl font-bold mb-8">
             Configuração do Quiz
           </h2>
 
           <div className="space-y-6">
-            <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
-                Título do Quiz *
-              </label>
-              <input
-                type="text"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Ex: Quiz de Inglês - Nível Básico"
-                className="w-full px-4 py-3 rounded-lg bg-white text-gray-800 placeholder-gray-400 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-            </div>
+            <FormInput
+              label="Título do Quiz *"
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
+              placeholder="Ex: Quiz de Inglês"
+            />
 
-            <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
-                Nível das questões *
-              </label>
+            <FormField label="Nível das questões *">
               <select
                 value={nivel}
                 onChange={(e) => setNivel(e.target.value)}
                 className="w-48 px-4 py-3 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
               >
-                <option value="A1">A1 - Iniciante</option>
-                <option value="A2">A2 - Elementar</option>
-                <option value="B1">B1 - Intermediário</option>
-                <option value="B2">B2 - Usuário Independente</option>
-                <option value="C1">C1 - Proficiência Operativa</option>
-                <option value="C2">C2 - Maestria</option>
+                {["A1", "A2", "B1", "B2", "C1", "C2"].map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
               </select>
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
-                Tipo de questões *
-              </label>
+            <FormField label="Tipo de questões *">
               <div className="flex items-center gap-6 flex-wrap">
-                <div className="flex items-center gap-3">
-                  <span className="text-white font-medium">Texto</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCategoriaToggle("texto")}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.texto ? "bg-purple-500" : "bg-gray-400"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.texto ? "translate-x-7" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-white font-medium">Imagem</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCategoriaToggle("imagem")}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.imagem ? "bg-purple-500" : "bg-gray-400"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.imagem ? "translate-x-7" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-white font-medium">Vídeo</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCategoriaToggle("video")}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.video ? "bg-purple-500" : "bg-gray-400"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.video ? "translate-x-7" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
-
+                {(["texto", "imagem", "video"] as const).map((cat) => (
+                  <FormToggle
+                    key={cat}
+                    label={cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    checked={categorias[cat]}
+                    onChange={() => handleCategoriaToggle(cat)}
+                  />
+                ))}
                 <div className="w-px h-8 bg-white/30" />
-
-                <div className="flex items-center gap-3">
-                  <span className="text-white font-medium">Misturado</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCategoriaToggle("misturado")}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.misturado ? "bg-[#00D9B5]" : "bg-gray-400"
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.misturado ? "translate-x-7" : ""
-                      }`}
-                    />
-                  </button>
-                </div>
+                <FormToggle
+                  label="Misturado"
+                  checked={categorias.misturado}
+                  onChange={() => handleCategoriaToggle("misturado")}
+                  activeColor="bg-[#00D9B5]"
+                />
               </div>
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
-                Tempo por questão (segundos) *
-              </label>
-              <input
+            <div className="flex gap-4">
+              <FormInput
+                label="Tempo (seg)"
                 type="number"
                 value={tempo}
                 onChange={(e) => setTempo(e.target.value)}
-                placeholder="30"
-                min="5"
-                max="300"
-                className="w-64 px-4 py-3 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-32"
               />
-            </div>
-
-            <div>
-              <label className="block text-white font-semibold mb-3 text-lg">
-                Quantidade de questões *
-              </label>
-              <input
+              <FormInput
+                label="Quantidade"
                 type="number"
                 value={quantidade}
                 onChange={(e) => setQuantidade(e.target.value)}
-                placeholder="5"
-                min="1"
-                max="50"
-                className="w-64 px-4 py-3 rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-32"
               />
             </div>
           </div>
