@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute } from "@/utils/ProtectedRoute";
 
 import Index from "./pages/Index";
 import { ProfessorLogin } from "./pages/professor/Login";

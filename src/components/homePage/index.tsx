@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { UserTypeCard } from "./UserTypeCard";
-import { Layout } from "./layout";
+import { UserTypeCard } from "../userTypeCard";
+import { Layout } from "../layout";
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();

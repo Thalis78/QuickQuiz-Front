@@ -1,24 +1,34 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronUp, ChevronDown, X } from 'lucide-react';
-import { useQuiz, QuizQuestion } from '@/contexts/QuizContext';
-import { toast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ChevronUp, ChevronDown, X } from "lucide-react";
+import { useQuiz, QuizQuestion } from "@/contexts/QuizContext";
+import { toast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout";
 
 export const CreateQuizStep2: React.FC = () => {
   const navigate = useNavigate();
-  const { currentQuiz, addQuestion, updateQuestion, deleteQuestion, reorderQuestions } = useQuiz();
-  
+  const {
+    currentQuiz,
+    addQuestion,
+    updateQuestion,
+    deleteQuestion,
+    reorderQuestions,
+  } = useQuiz();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(null);
-  
+  const [editingQuestion, setEditingQuestion] = useState<QuizQuestion | null>(
+    null,
+  );
+
   // Estado do formulário do modal
   const [enunciado, setEnunciado] = useState("");
   const [alternativaA, setAlternativaA] = useState("");
   const [alternativaB, setAlternativaB] = useState("");
   const [alternativaC, setAlternativaC] = useState("");
   const [alternativaD, setAlternativaD] = useState("");
-  const [respostaCorreta, setRespostaCorreta] = useState<"A" | "B" | "C" | "D" | "">("");
+  const [respostaCorreta, setRespostaCorreta] = useState<
+    "A" | "B" | "C" | "D" | ""
+  >("");
 
   const questoes = currentQuiz?.questoes || [];
 
@@ -30,9 +40,13 @@ export const CreateQuizStep2: React.FC = () => {
       setAlternativaB(question.alternativas[1]?.texto || "");
       setAlternativaC(question.alternativas[2]?.texto || "");
       setAlternativaD(question.alternativas[3]?.texto || "");
-      
-      const corretaIndex = question.alternativas.findIndex(a => a.correta);
-      setRespostaCorreta(corretaIndex >= 0 ? String.fromCharCode(65 + corretaIndex) as "A" | "B" | "C" | "D" : "");
+
+      const corretaIndex = question.alternativas.findIndex((a) => a.correta);
+      setRespostaCorreta(
+        corretaIndex >= 0
+          ? (String.fromCharCode(65 + corretaIndex) as "A" | "B" | "C" | "D")
+          : "",
+      );
     } else {
       resetForm();
     }
@@ -65,7 +79,12 @@ export const CreateQuizStep2: React.FC = () => {
       return;
     }
 
-    if (!alternativaA.trim() || !alternativaB.trim() || !alternativaC.trim() || !alternativaD.trim()) {
+    if (
+      !alternativaA.trim() ||
+      !alternativaB.trim() ||
+      !alternativaC.trim() ||
+      !alternativaD.trim()
+    ) {
       toast({
         title: "Alternativas incompletas",
         description: "Preencha todas as 4 alternativas.",
@@ -105,7 +124,7 @@ export const CreateQuizStep2: React.FC = () => {
       addQuestion(newQuestion);
       toast({
         title: "Questão adicionada!",
-        description: 'Nova questão criada com sucesso.',
+        description: "Nova questão criada com sucesso.",
       });
     }
 
@@ -178,21 +197,24 @@ export const CreateQuizStep2: React.FC = () => {
               <h3 className="text-white text-xl font-semibold mb-4">
                 Lista de Perguntas ({questoes.length})
               </h3>
-              
+
               <div className="space-y-4">
                 {questoes.map((pergunta, index) => (
-                  <div key={pergunta.id} className="bg-[#7B73E8] rounded-2xl p-6">
+                  <div
+                    key={pergunta.id}
+                    className="bg-[#7B73E8] rounded-2xl p-6"
+                  >
                     <div className="flex items-start gap-4">
                       <div className="flex flex-col gap-1">
                         <button
-                          onClick={() => handleMoveQuestion(index, 'up')}
+                          onClick={() => handleMoveQuestion(index, "up")}
                           disabled={index === 0}
                           className="text-white hover:text-gray-200 disabled:opacity-30"
                         >
                           <ChevronUp size={20} />
                         </button>
                         <button
-                          onClick={() => handleMoveQuestion(index, 'down')}
+                          onClick={() => handleMoveQuestion(index, "down")}
                           disabled={index === questoes.length - 1}
                           className="text-white hover:text-gray-200 disabled:opacity-30"
                         >
@@ -204,7 +226,7 @@ export const CreateQuizStep2: React.FC = () => {
                         <h4 className="text-white font-bold text-lg mb-2">
                           Pergunta {index + 1}
                         </h4>
-                        
+
                         <div className="bg-white rounded-lg px-4 py-3 mb-3">
                           <p className="text-gray-800">{pergunta.enunciado}</p>
                         </div>
@@ -215,11 +237,14 @@ export const CreateQuizStep2: React.FC = () => {
                               key={i}
                               className={`px-3 py-2 rounded-lg text-sm ${
                                 alt.correta
-                                  ? 'bg-[#00D9B5] text-white font-semibold'
-                                  : 'bg-white/20 text-white'
+                                  ? "bg-[#00D9B5] text-white font-semibold"
+                                  : "bg-white/20 text-white"
                               }`}
                             >
-                              <span className="font-bold">{String.fromCharCode(65 + i)}</span> {alt.texto}
+                              <span className="font-bold">
+                                {String.fromCharCode(65 + i)}
+                              </span>{" "}
+                              {alt.texto}
                             </div>
                           ))}
                         </div>
@@ -249,7 +274,9 @@ export const CreateQuizStep2: React.FC = () => {
           {questoes.length === 0 && (
             <div className="text-center py-12 text-white/60">
               <p className="text-lg">Nenhuma questão adicionada ainda.</p>
-              <p className="text-sm mt-2">Clique em "Adicionar Pergunta" para começar.</p>
+              <p className="text-sm mt-2">
+                Clique em "Adicionar Pergunta" para começar.
+              </p>
             </div>
           )}
 
@@ -277,9 +304,12 @@ export const CreateQuizStep2: React.FC = () => {
           <div className="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-gray-800">
-                {editingQuestion ? 'Editar Questão' : 'Adicionar Questão'}
+                {editingQuestion ? "Editar Questão" : "Adicionar Questão"}
               </h3>
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -302,7 +332,7 @@ export const CreateQuizStep2: React.FC = () => {
                 <label className="block text-gray-700 font-semibold mb-2">
                   Alternativas *
                 </label>
-                
+
                 <div className="space-y-3">
                   <div className="flex gap-2">
                     <span className="flex items-center justify-center w-8 h-10 bg-purple-500 text-white font-bold rounded">
@@ -318,8 +348,8 @@ export const CreateQuizStep2: React.FC = () => {
                     <input
                       type="radio"
                       name="correta"
-                      checked={respostaCorreta === 'A'}
-                      onChange={() => setRespostaCorreta('A')}
+                      checked={respostaCorreta === "A"}
+                      onChange={() => setRespostaCorreta("A")}
                       className="w-5 h-5 mt-2"
                     />
                   </div>
@@ -338,8 +368,8 @@ export const CreateQuizStep2: React.FC = () => {
                     <input
                       type="radio"
                       name="correta"
-                      checked={respostaCorreta === 'B'}
-                      onChange={() => setRespostaCorreta('B')}
+                      checked={respostaCorreta === "B"}
+                      onChange={() => setRespostaCorreta("B")}
                       className="w-5 h-5 mt-2"
                     />
                   </div>
@@ -358,8 +388,8 @@ export const CreateQuizStep2: React.FC = () => {
                     <input
                       type="radio"
                       name="correta"
-                      checked={respostaCorreta === 'C'}
-                      onChange={() => setRespostaCorreta('C')}
+                      checked={respostaCorreta === "C"}
+                      onChange={() => setRespostaCorreta("C")}
                       className="w-5 h-5 mt-2"
                     />
                   </div>
@@ -378,13 +408,13 @@ export const CreateQuizStep2: React.FC = () => {
                     <input
                       type="radio"
                       name="correta"
-                      checked={respostaCorreta === 'D'}
-                      onChange={() => setRespostaCorreta('D')}
+                      checked={respostaCorreta === "D"}
+                      onChange={() => setRespostaCorreta("D")}
                       className="w-5 h-5 mt-2"
                     />
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-gray-500 mt-2">
                   * Marque o círculo da alternativa correta
                 </p>
@@ -402,7 +432,7 @@ export const CreateQuizStep2: React.FC = () => {
                 onClick={handleSaveQuestion}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
               >
-                {editingQuestion ? 'Salvar Alterações' : 'Adicionar Questão'}
+                {editingQuestion ? "Salvar Alterações" : "Adicionar Questão"}
               </button>
             </div>
           </div>

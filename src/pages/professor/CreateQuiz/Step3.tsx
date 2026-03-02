@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
 import { toast } from "@/hooks/use-toast";
-import { Layout } from "@/components/layout"
+import { Layout } from "@/components/layout";
 
 export const CreateQuizStep3: React.FC = () => {
   const navigate = useNavigate();
@@ -34,7 +34,11 @@ export const CreateQuizStep3: React.FC = () => {
   };
 
   const handleCancelar = () => {
-    if (confirm("Tem certeza que deseja cancelar? Todas as alterações serão perdidas.")) {
+    if (
+      confirm(
+        "Tem certeza que deseja cancelar? Todas as alterações serão perdidas.",
+      )
+    ) {
       navigate("/professor/dashboard");
     }
   };
@@ -57,7 +61,9 @@ export const CreateQuizStep3: React.FC = () => {
 
           {config && (
             <div className="bg-[#5B54D8] rounded-2xl p-6 mb-6">
-              <h3 className="text-white font-bold text-xl mb-4">Configurações do Quiz</h3>
+              <h3 className="text-white font-bold text-xl mb-4">
+                Configurações do Quiz
+              </h3>
               <div className="grid grid-cols-2 gap-4 text-white">
                 <div>
                   <p className="text-white/70 text-sm">Título:</p>
@@ -69,7 +75,9 @@ export const CreateQuizStep3: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-white/70 text-sm">Tempo por questão:</p>
-                  <p className="font-semibold">{config.tempoPorQuestao} segundos</p>
+                  <p className="font-semibold">
+                    {config.tempoPorQuestao} segundos
+                  </p>
                 </div>
                 <div>
                   <p className="text-white/70 text-sm">Total de questões:</p>
@@ -81,13 +89,19 @@ export const CreateQuizStep3: React.FC = () => {
 
           {/* Lista de Perguntas */}
           <div className="space-y-4 mb-10">
-            <h3 className="text-white font-bold text-xl mb-4">Questões Criadas</h3>
-            
+            <h3 className="text-white font-bold text-xl mb-4">
+              Questões Criadas
+            </h3>
+
             {questoes.map((pergunta, index) => {
-              const respostaCorreta = pergunta.alternativas.find(a => a.correta);
+              const respostaCorreta = pergunta.alternativas.find(
+                (a) => a.correta,
+              );
               const letraCorreta = respostaCorreta
-                ? String.fromCharCode(65 + pergunta.alternativas.indexOf(respostaCorreta))
-                : '';
+                ? String.fromCharCode(
+                    65 + pergunta.alternativas.indexOf(respostaCorreta),
+                  )
+                : "";
 
               return (
                 <div
@@ -113,18 +127,23 @@ export const CreateQuizStep3: React.FC = () => {
                           key={i}
                           className={`px-3 py-2 rounded-lg text-sm ${
                             alt.correta
-                              ? 'bg-[#00D9B5] text-white font-semibold'
-                              : 'bg-white/20 text-white'
+                              ? "bg-[#00D9B5] text-white font-semibold"
+                              : "bg-white/20 text-white"
                           }`}
                         >
-                          <span className="font-bold">{String.fromCharCode(65 + i)}</span> {alt.texto}
+                          <span className="font-bold">
+                            {String.fromCharCode(65 + i)}
+                          </span>{" "}
+                          {alt.texto}
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <p className="text-white/80 text-sm mb-1">Resposta Correta:</p>
+                    <p className="text-white/80 text-sm mb-1">
+                      Resposta Correta:
+                    </p>
                     <div className="bg-[#00D9B5] inline-block rounded-lg px-4 py-2">
                       <p className="text-white font-bold">
                         {letraCorreta} - {respostaCorreta?.texto}

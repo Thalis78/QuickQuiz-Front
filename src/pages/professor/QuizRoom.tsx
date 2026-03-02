@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Users, Play, X, ArrowRight, CheckCircle } from 'lucide-react';
-import { Layout } from '@/components/layout';
-import { ConfirmModal } from '@/components/ConfirmModal';
-import { useQuiz } from '@/contexts/QuizContext';
-import { socketService } from '@/services/socketService';
-import { toast } from 'sonner';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
+import { Copy, Users, Play, X, ArrowRight, CheckCircle } from "lucide-react";
+import { Layout } from "@/components/layout";
+import { ConfirmModal } from "@/components/confirmModal";
+import { useQuiz } from "@/contexts/QuizContext";
+import { socketService } from "@/services/socketService";
+import { toast } from "sonner";
 
 interface Student {
   id: string;
@@ -18,23 +18,25 @@ export const QuizRoomPage: React.FC = () => {
   const navigate = useNavigate();
   const { quizId } = useParams<{ quizId: string }>();
   const { savedQuizzes } = useQuiz();
-  
-  const [roomCode, setRoomCode] = useState<string>('');
-  const [roomUrl, setRoomUrl] = useState<string>('');
+
+  const [roomCode, setRoomCode] = useState<string>("");
+  const [roomUrl, setRoomUrl] = useState<string>("");
   const [students, setStudents] = useState<Student[]>([]);
   const [totalStudents, setTotalStudents] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  const [answeredStudents, setAnsweredStudents] = useState<Set<string>>(new Set());
+  const [answeredStudents, setAnsweredStudents] = useState<Set<string>>(
+    new Set(),
+  );
   const [quiz, setQuiz] = useState<any>(null);
   const [startModal, setStartModal] = useState(false);
   const [closeModal, setCloseModal] = useState(false);
 
   useEffect(() => {
-    const selectedQuiz = savedQuizzes.find(q => q.id === quizId);
+    const selectedQuiz = savedQuizzes.find((q) => q.id === quizId);
     if (!selectedQuiz) {
-      toast.error('Quiz não encontrado.');
-      navigate('/professor/dashboard');
+      toast.error("Quiz não encontrado.");
+      navigate("/professor/dashboard");
       return;
     }
 
@@ -42,12 +44,15 @@ export const QuizRoomPage: React.FC = () => {
 
     // Conecta ao Socket.IO
     if (!socketService.isConnected()) {
-      socketService.connect().then(() => {
-        createSocketRoom(selectedQuiz);
-      }).catch((error) => {
-        toast.error('Não foi possível conectar ao servidor.');
-        navigate('/professor/dashboard');
-      });
+      socketService
+        .connect()
+        .then(() => {
+          createSocketRoom(selectedQuiz);
+        })
+        .catch((error) => {
+          toast.error("Não foi possível conectar ao servidor.");
+          navigate("/professor/dashboard");
+        });
     } else {
       createSocketRoom(selectedQuiz);
     }
@@ -64,7 +69,7 @@ export const QuizRoomPage: React.FC = () => {
     });
 
     socketService.onStudentAnswered((data) => {
-      setAnsweredStudents(prev => new Set(prev).add(data.studentId));
+      setAnsweredStudents((prev) => new Set(prev).add(data.studentId));
     });
 
     // Listener para próxima questão (avanço automático)
@@ -76,18 +81,18 @@ export const QuizRoomPage: React.FC = () => {
 
     // Listener para quiz finalizado (avanço automático)
     socketService.onQuizFinished(() => {
-      toast.success('Quiz finalizado! Todos os alunos verão os resultados.');
+      toast.success("Quiz finalizado! Todos os alunos verão os resultados.");
       setTimeout(() => {
-        navigate('/professor/dashboard');
+        navigate("/professor/dashboard");
       }, 2000);
     });
 
     return () => {
-      socketService.off('student-joined');
-      socketService.off('student-left');
-      socketService.off('student-answered');
-      socketService.off('next-question');
-      socketService.off('quiz-finished');
+      socketService.off("student-joined");
+      socketService.off("student-left");
+      socketService.off("student-answered");
+      socketService.off("next-question");
+      socketService.off("quiz-finished");
     };
   }, [quizId, savedQuizzes, navigate]);
 
@@ -98,49 +103,49 @@ export const QuizRoomPage: React.FC = () => {
         setRoomCode(code);
         const url = `${window.location.origin}/aluno/entrar/${code}`;
         setRoomUrl(url);
-        
+
         toast.success(`Sala criada! Código: ${code}`);
       } else {
-        toast.error(response.error || 'Erro ao criar sala.');
-        navigate('/professor/dashboard');
+        toast.error(response.error || "Erro ao criar sala.");
+        navigate("/professor/dashboard");
       }
     });
   };
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(roomCode);
-    toast.success('Código copiado!');
+    toast.success("Código copiado!");
   };
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(roomUrl);
-    toast.success('Link copiado!');
+    toast.success("Link copiado!");
   };
 
   const handleStartQuiz = () => {
     if (totalStudents === 0) {
-      toast.error('Aguarde pelo menos 1 aluno entrar na sala.');
+      toast.error("Aguarde pelo menos 1 aluno entrar na sala.");
       return;
     }
 
     // Previne double-click
     if (isPlaying) {
-      console.log('⚠️ Quiz já iniciado - ignorando clique');
+      console.log("⚠️ Quiz já iniciado - ignorando clique");
       return;
     }
 
     // Desabilita botão imediatamente
     setIsPlaying(true);
-    
+
     socketService.startQuiz(roomCode, (response) => {
       if (response.success) {
         setCurrentQuestionIndex(0);
         setAnsweredStudents(new Set());
-        toast.success('Quiz iniciado para todos os alunos!');
+        toast.success("Quiz iniciado para todos os alunos!");
       } else {
         // Reverte estado se houver erro
         setIsPlaying(false);
-        toast.error(response.error || 'Erro ao iniciar quiz.');
+        toast.error(response.error || "Erro ao iniciar quiz.");
       }
     });
   };
@@ -149,23 +154,25 @@ export const QuizRoomPage: React.FC = () => {
     socketService.nextQuestion(roomCode, (response) => {
       if (response.success) {
         if (response.finished) {
-          toast.success('Quiz finalizado! Todos os alunos verão os resultados.');
-          navigate('/professor/dashboard');
+          toast.success(
+            "Quiz finalizado! Todos os alunos verão os resultados.",
+          );
+          navigate("/professor/dashboard");
         } else {
-          setCurrentQuestionIndex(prev => prev + 1);
+          setCurrentQuestionIndex((prev) => prev + 1);
           setAnsweredStudents(new Set());
           toast.success(`Questão ${currentQuestionIndex + 2} iniciada.`);
         }
       } else {
-        toast.error(response.error || 'Não foi possível avançar.');
+        toast.error(response.error || "Não foi possível avançar.");
       }
     });
   };
 
   const handleCloseRoom = () => {
     socketService.closeRoom(roomCode);
-    toast.success('Sala encerrada.');
-    navigate('/professor/dashboard');
+    toast.success("Sala encerrada.");
+    navigate("/professor/dashboard");
   };
 
   if (!quiz || !roomCode) {
@@ -180,7 +187,9 @@ export const QuizRoomPage: React.FC = () => {
     <Layout>
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
-          {isPlaying ? `Quiz em Andamento - Questão ${currentQuestionIndex + 1}/${quiz.questoes.length}` : 'Sala de Espera'}
+          {isPlaying
+            ? `Quiz em Andamento - Questão ${currentQuestionIndex + 1}/${quiz.questoes.length}`
+            : "Sala de Espera"}
         </div>
 
         <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -250,18 +259,27 @@ export const QuizRoomPage: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
                   <div>
-                    <span className="font-semibold">Nível:</span> {quiz.config.nivel}
+                    <span className="font-semibold">Nível:</span>{" "}
+                    {quiz.config.nivel}
                   </div>
                   <div>
-                    <span className="font-semibold">Questões:</span> {quiz.questoes.length}
+                    <span className="font-semibold">Questões:</span>{" "}
+                    {quiz.questoes.length}
                   </div>
                   <div>
-                    <span className="font-semibold">Tempo:</span> {quiz.config.tempoPorQuestao}s
+                    <span className="font-semibold">Tempo:</span>{" "}
+                    {quiz.config.tempoPorQuestao}s
                   </div>
                   <div>
-                    <span className="font-semibold">Status:</span>{' '}
-                    <span className={isPlaying ? 'text-green-600 font-bold' : 'text-orange-600 font-bold'}>
-                      {isPlaying ? 'Em Andamento' : 'Aguardando'}
+                    <span className="font-semibold">Status:</span>{" "}
+                    <span
+                      className={
+                        isPlaying
+                          ? "text-green-600 font-bold"
+                          : "text-orange-600 font-bold"
+                      }
+                    >
+                      {isPlaying ? "Em Andamento" : "Aguardando"}
                     </span>
                   </div>
                 </div>
@@ -292,9 +310,11 @@ export const QuizRoomPage: React.FC = () => {
                     <p className="text-sm mb-2">Progresso das Respostas:</p>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 bg-white/20 rounded-full h-4">
-                        <div 
+                        <div
                           className="bg-[#00D9B5] h-4 rounded-full transition-all"
-                          style={{ width: `${(answeredStudents.size / totalStudents) * 100}%` }}
+                          style={{
+                            width: `${(answeredStudents.size / totalStudents) * 100}%`,
+                          }}
                         />
                       </div>
                       <span className="font-bold">
@@ -332,8 +352,12 @@ export const QuizRoomPage: React.FC = () => {
                 {totalStudents === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <Users size={64} className="mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">Nenhum aluno conectado ainda</p>
-                    <p className="text-sm mt-2">Compartilhe o QR Code ou código da sala</p>
+                    <p className="text-lg font-medium">
+                      Nenhum aluno conectado ainda
+                    </p>
+                    <p className="text-sm mt-2">
+                      Compartilhe o QR Code ou código da sala
+                    </p>
                   </div>
                 ) : (
                   <div className="mb-6">
@@ -355,7 +379,7 @@ export const QuizRoomPage: React.FC = () => {
                     <Play size={24} />
                     Iniciar Quiz
                   </button>
-                  
+
                   <button
                     onClick={() => setCloseModal(true)}
                     className="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors"

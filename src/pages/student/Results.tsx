@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, Medal, Award, Home } from 'lucide-react';
-import { Layout } from '@/components/layout';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Trophy, Medal, Award, Home } from "lucide-react";
+import { Layout } from "@/components/layout";
 
 interface Result {
   id: string;
@@ -18,25 +18,25 @@ export const StudentResultsPage: React.FC = () => {
   const [myPosition, setMyPosition] = useState<number>(0);
 
   useEffect(() => {
-    const studentId = sessionStorage.getItem('studentId');
+    const studentId = sessionStorage.getItem("studentId");
     const resultsData = location.state?.results as Result[];
 
     if (!resultsData || !studentId) {
-      navigate('/');
+      navigate("/");
       return;
     }
 
     setResults(resultsData);
-    
-    const myIndex = resultsData.findIndex(r => r.id === studentId);
+
+    const myIndex = resultsData.findIndex((r) => r.id === studentId);
     if (myIndex !== -1) {
       setMyResult(resultsData[myIndex]);
       setMyPosition(myIndex + 1);
     }
 
     // Limpa sessionStorage
-    sessionStorage.removeItem('studentId');
-    sessionStorage.removeItem('studentName');
+    sessionStorage.removeItem("studentId");
+    sessionStorage.removeItem("studentName");
   }, [location, navigate]);
 
   const getMedalIcon = (position: number) => {
@@ -55,13 +55,13 @@ export const StudentResultsPage: React.FC = () => {
   const getPositionColor = (position: number) => {
     switch (position) {
       case 1:
-        return 'from-yellow-400 to-yellow-600';
+        return "from-yellow-400 to-yellow-600";
       case 2:
-        return 'from-gray-300 to-gray-500';
+        return "from-gray-300 to-gray-500";
       case 3:
-        return 'from-orange-400 to-orange-600';
+        return "from-orange-400 to-orange-600";
       default:
-        return 'from-[#605BEF] to-[#7B73E8]';
+        return "from-[#605BEF] to-[#7B73E8]";
     }
   };
 
@@ -73,7 +73,9 @@ export const StudentResultsPage: React.FC = () => {
     );
   }
 
-  const percentage = Math.round((myResult.score / myResult.totalQuestions) * 100);
+  const percentage = Math.round(
+    (myResult.score / myResult.totalQuestions) * 100,
+  );
 
   return (
     <Layout>
@@ -84,7 +86,9 @@ export const StudentResultsPage: React.FC = () => {
           </h1>
 
           {/* Seu Resultado */}
-          <div className={`bg-gradient-to-r ${getPositionColor(myPosition)} rounded-3xl p-8 shadow-2xl mb-8 text-white`}>
+          <div
+            className={`bg-gradient-to-r ${getPositionColor(myPosition)} rounded-3xl p-8 shadow-2xl mb-8 text-white`}
+          >
             <div className="text-center mb-6">
               <div className="flex justify-center mb-4">
                 {getMedalIcon(myPosition) || (
@@ -125,38 +129,51 @@ export const StudentResultsPage: React.FC = () => {
               {results.map((result, index) => {
                 const position = index + 1;
                 const isMe = result.id === myResult.id;
-                const resultPercentage = Math.round((result.score / result.totalQuestions) * 100);
+                const resultPercentage = Math.round(
+                  (result.score / result.totalQuestions) * 100,
+                );
 
                 return (
                   <div
                     key={result.id}
                     className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
                       isMe
-                        ? 'bg-[#605BEF] text-white shadow-lg scale-105'
-                        : 'bg-gray-100 hover:bg-gray-200'
+                        ? "bg-[#605BEF] text-white shadow-lg scale-105"
+                        : "bg-gray-100 hover:bg-gray-200"
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
-                      position <= 3
-                        ? 'bg-gradient-to-br ' + getPositionColor(position) + ' text-white'
-                        : isMe
-                          ? 'bg-white text-[#605BEF]'
-                          : 'bg-[#605BEF] text-white'
-                    }`}>
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
+                        position <= 3
+                          ? "bg-gradient-to-br " +
+                            getPositionColor(position) +
+                            " text-white"
+                          : isMe
+                            ? "bg-white text-[#605BEF]"
+                            : "bg-[#605BEF] text-white"
+                      }`}
+                    >
                       {position}
                     </div>
 
                     <div className="flex-1">
-                      <p className={`font-bold text-lg ${isMe ? 'text-white' : 'text-gray-800'}`}>
-                        {result.name} {isMe && '(Você)'}
+                      <p
+                        className={`font-bold text-lg ${isMe ? "text-white" : "text-gray-800"}`}
+                      >
+                        {result.name} {isMe && "(Você)"}
                       </p>
-                      <p className={`text-sm ${isMe ? 'text-white/80' : 'text-gray-600'}`}>
-                        {result.score} / {result.totalQuestions} questões corretas
+                      <p
+                        className={`text-sm ${isMe ? "text-white/80" : "text-gray-600"}`}
+                      >
+                        {result.score} / {result.totalQuestions} questões
+                        corretas
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className={`text-2xl font-bold ${isMe ? 'text-white' : 'text-[#605BEF]'}`}>
+                      <p
+                        className={`text-2xl font-bold ${isMe ? "text-white" : "text-[#605BEF]"}`}
+                      >
                         {resultPercentage}%
                       </p>
                       {position <= 3 && getMedalIcon(position)}
@@ -170,7 +187,7 @@ export const StudentResultsPage: React.FC = () => {
           {/* Botão voltar */}
           <div className="text-center mt-8">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="bg-white hover:bg-gray-100 text-[#605BEF] px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg inline-flex items-center gap-3"
             >
               <Home size={24} />

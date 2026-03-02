@@ -7,7 +7,7 @@ import { Layout } from "@/components/layout";
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
   const { currentQuiz, setConfig } = useQuiz();
-  
+
   const [titulo, setTitulo] = useState("");
   const [nivel, setNivel] = useState(currentQuiz?.config.nivel || "A1");
   const [categorias, setCategorias] = useState(
@@ -15,16 +15,20 @@ export const CreateQuizStep1: React.FC = () => {
       texto: false,
       imagem: false,
       video: false,
-      misturado: true
-    }
+      misturado: true,
+    },
   );
-  const [tempo, setTempo] = useState(currentQuiz?.config.tempoPorQuestao?.toString() || "30");
-  const [quantidade, setQuantidade] = useState(currentQuiz?.config.quantidadeQuestoes?.toString() || "5");
+  const [tempo, setTempo] = useState(
+    currentQuiz?.config.tempoPorQuestao?.toString() || "30",
+  );
+  const [quantidade, setQuantidade] = useState(
+    currentQuiz?.config.quantidadeQuestoes?.toString() || "5",
+  );
 
   const handleCategoriaToggle = (categoria: keyof typeof categorias) => {
-    setCategorias(prev => ({
+    setCategorias((prev) => ({
       ...prev,
-      [categoria]: !prev[categoria]
+      [categoria]: !prev[categoria],
     }));
   };
 
@@ -59,7 +63,7 @@ export const CreateQuizStep1: React.FC = () => {
       return;
     }
 
-    const algumaSelecionada = Object.values(categorias).some(v => v);
+    const algumaSelecionada = Object.values(categorias).some((v) => v);
     if (!algumaSelecionada) {
       toast({
         title: "Categoria obrigatória",
@@ -140,14 +144,14 @@ export const CreateQuizStep1: React.FC = () => {
                   <span className="text-white font-medium">Texto</span>
                   <button
                     type="button"
-                    onClick={() => handleCategoriaToggle('texto')}
+                    onClick={() => handleCategoriaToggle("texto")}
                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.texto ? 'bg-purple-500' : 'bg-gray-400'
+                      categorias.texto ? "bg-purple-500" : "bg-gray-400"
                     }`}
                   >
                     <span
                       className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.texto ? 'translate-x-7' : ''
+                        categorias.texto ? "translate-x-7" : ""
                       }`}
                     />
                   </button>
@@ -157,14 +161,14 @@ export const CreateQuizStep1: React.FC = () => {
                   <span className="text-white font-medium">Imagem</span>
                   <button
                     type="button"
-                    onClick={() => handleCategoriaToggle('imagem')}
+                    onClick={() => handleCategoriaToggle("imagem")}
                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.imagem ? 'bg-purple-500' : 'bg-gray-400'
+                      categorias.imagem ? "bg-purple-500" : "bg-gray-400"
                     }`}
                   >
                     <span
                       className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.imagem ? 'translate-x-7' : ''
+                        categorias.imagem ? "translate-x-7" : ""
                       }`}
                     />
                   </button>
@@ -174,14 +178,14 @@ export const CreateQuizStep1: React.FC = () => {
                   <span className="text-white font-medium">Vídeo</span>
                   <button
                     type="button"
-                    onClick={() => handleCategoriaToggle('video')}
+                    onClick={() => handleCategoriaToggle("video")}
                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.video ? 'bg-purple-500' : 'bg-gray-400'
+                      categorias.video ? "bg-purple-500" : "bg-gray-400"
                     }`}
                   >
                     <span
                       className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.video ? 'translate-x-7' : ''
+                        categorias.video ? "translate-x-7" : ""
                       }`}
                     />
                   </button>
@@ -193,14 +197,14 @@ export const CreateQuizStep1: React.FC = () => {
                   <span className="text-white font-medium">Misturado</span>
                   <button
                     type="button"
-                    onClick={() => handleCategoriaToggle('misturado')}
+                    onClick={() => handleCategoriaToggle("misturado")}
                     className={`relative w-14 h-7 rounded-full transition-colors ${
-                      categorias.misturado ? 'bg-[#00D9B5]' : 'bg-gray-400'
+                      categorias.misturado ? "bg-[#00D9B5]" : "bg-gray-400"
                     }`}
                   >
                     <span
                       className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform ${
-                        categorias.misturado ? 'translate-x-7' : ''
+                        categorias.misturado ? "translate-x-7" : ""
                       }`}
                     />
                   </button>

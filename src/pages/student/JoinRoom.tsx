@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { LogIn, ArrowLeft } from 'lucide-react';
-import { socketService } from '@/services/socketService';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { LogIn, ArrowLeft } from "lucide-react";
+import { socketService } from "@/services/socketService";
+import { toast } from "sonner";
 import { Layout } from "@/components/layout";
 
 export const StudentJoinPage: React.FC = () => {
   const navigate = useNavigate();
   const { code: urlCode } = useParams<{ code?: string }>();
-  
-  const [roomCode, setRoomCode] = useState(urlCode || '');
-  const [studentName, setStudentName] = useState('');
+
+  const [roomCode, setRoomCode] = useState(urlCode || "");
+  const [studentName, setStudentName] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
     if (!socketService.isConnected()) {
       socketService.connect().catch(() => {
-        toast.error('Não foi possível conectar ao servidor. Tente novamente.');
+        toast.error("Não foi possível conectar ao servidor. Tente novamente.");
       });
     }
   }, []);
 
   const handleJoinRoom = async () => {
     if (!studentName.trim()) {
-      toast.error('Digite seu nome para entrar na sala.');
+      toast.error("Digite seu nome para entrar na sala.");
       return;
     }
 
     if (!roomCode.trim()) {
-      toast.error('Digite o código da sala.');
+      toast.error("Digite o código da sala.");
       return;
     }
 
@@ -36,7 +36,7 @@ export const StudentJoinPage: React.FC = () => {
       try {
         await socketService.connect();
       } catch (error) {
-        toast.error('Erro de conexão. Verifique sua internet.');
+        toast.error("Erro de conexão. Verifique sua internet.");
         return;
       }
     }
@@ -47,31 +47,39 @@ export const StudentJoinPage: React.FC = () => {
       setIsConnecting(false);
 
       if (response.success) {
-        sessionStorage.setItem('studentId', response.studentId);
-        sessionStorage.setItem('studentName', studentName.trim());
-        sessionStorage.setItem('roomCode', roomCode.trim());
-        
-        if (response.quiz) sessionStorage.setItem('quizData', JSON.stringify(response.quiz));
-        if (response.totalQuestions) sessionStorage.setItem('totalQuestions', response.totalQuestions.toString());
-        if (response.students) sessionStorage.setItem('studentsList', JSON.stringify(response.students));
+        sessionStorage.setItem("studentId", response.studentId);
+        sessionStorage.setItem("studentName", studentName.trim());
+        sessionStorage.setItem("roomCode", roomCode.trim());
+
+        if (response.quiz)
+          sessionStorage.setItem("quizData", JSON.stringify(response.quiz));
+        if (response.totalQuestions)
+          sessionStorage.setItem(
+            "totalQuestions",
+            response.totalQuestions.toString(),
+          );
+        if (response.students)
+          sessionStorage.setItem(
+            "studentsList",
+            JSON.stringify(response.students),
+          );
 
         toast.success(`Bem-vindo à sala, ${studentName.trim()}!`);
         navigate(`/aluno/sala/${roomCode.trim()}`);
       } else {
-        toast.error(response.error || 'Não foi possível entrar na sala.');
+        toast.error(response.error || "Não foi possível entrar na sala.");
       }
     });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleJoinRoom();
+    if (e.key === "Enter") handleJoinRoom();
   };
 
   return (
     <Layout>
       <main className="flex flex-col items-center justify-center px-4 pt-32 pb-12">
         <div className="w-full max-w-md bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
-          
           <div className="flex flex-col items-center mb-8">
             <div className="w-20 h-20 bg-[#605BEF] rounded-full flex items-center justify-center mb-4 shadow-lg">
               <LogIn size={40} className="text-white" />
@@ -110,7 +118,9 @@ export const StudentJoinPage: React.FC = () => {
               <input
                 type="text"
                 value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) =>
+                  setRoomCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 onKeyPress={handleKeyPress}
                 placeholder="000000"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] focus:border-transparent outline-none transition text-center text-2xl font-bold tracking-widest"
@@ -130,7 +140,7 @@ export const StudentJoinPage: React.FC = () => {
               className="w-full bg-[#605BEF] text-white py-4 rounded-lg font-bold hover:bg-[#4f4bd9] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
             >
               <LogIn size={20} />
-              {isConnecting ? 'Conectando...' : 'Entrar na Sala'}
+              {isConnecting ? "Conectando..." : "Entrar na Sala"}
             </button>
           </div>
 
@@ -142,7 +152,7 @@ export const StudentJoinPage: React.FC = () => {
 
           <div className="mt-6 text-center">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="text-[#605BEF] hover:underline text-sm font-medium inline-flex items-center gap-1"
             >
               <ArrowLeft size={14} /> Voltar para o início
