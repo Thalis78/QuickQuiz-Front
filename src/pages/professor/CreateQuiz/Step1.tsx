@@ -59,7 +59,7 @@ export const CreateQuizStep1: React.FC = () => {
 
   return (
     <Layout>
-      <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
+      <main className="relative z-10 flex flex-col items-center px-4 pt-20 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
           Criar Quiz
         </div>
@@ -130,7 +130,13 @@ export const CreateQuizStep1: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center gap-4 mt-10">
+            <button
+              onClick={() => navigate("/professor/dashboard")}
+              className="bg-[#5B54D8] text-white px-8 py-3 rounded-full font-bold"
+            >
+              ← Voltar ao Dashboard
+            </button>
             <button
               onClick={handleProximaEtapa}
               className="bg-[#7B73E8] hover:bg-[#6B63D8] text-white px-10 py-3 rounded-full font-bold text-lg transition-colors flex items-center gap-2"

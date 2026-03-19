@@ -76,7 +76,7 @@ export const CreateQuizStep2: React.FC = () => {
 
   return (
     <Layout>
-      <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
+      <main className="relative z-10 flex flex-col items-center px-4 pt-20 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
           Criar Quiz
         </div>

@@ -10,16 +10,20 @@ export const CreateQuizStep3: React.FC = () => {
   const questoes = currentQuiz?.questoes || [];
   const config = currentQuiz?.config;
 
-  const handleConfirmar = () => {
+  const handleConfirmar = async () => {
     if (!currentQuiz)
       return toast({
         title: "Erro",
         description: "Quiz não encontrado.",
         variant: "destructive",
       });
-    saveQuiz();
-    toast({ title: "Quiz criado!", description: "Pronto para uso." });
-    navigate("/professor/dashboard");
+    
+    const saved = await saveQuiz();
+    
+    if (saved) {
+      toast({ title: "Quiz criado!", description: "Pronto para uso." });
+      navigate("/professor/dashboard");
+    }
   };
 
   const handleCancelar = () => {
@@ -29,7 +33,7 @@ export const CreateQuizStep3: React.FC = () => {
 
   return (
     <Layout>
-      <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
+      <main className="relative z-10 flex flex-col items-center px-4 pt-20 pb-12">
         <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
           Criar Quiz
         </div>
