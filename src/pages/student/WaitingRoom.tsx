@@ -5,23 +5,8 @@ import { ConfirmModal } from "@/components/confirmModal";
 import { socketService } from "@/services/socketService";
 import { toast } from "sonner";
 import { Layout } from "@/components/layout";
+import { Quiz,Student } from "@/types/type";
 
-interface QuizConfig {
-  nivel: string;
-  tempoPorQuestao: number;
-  titulo: string;
-}
-
-interface Quiz {
-  config: QuizConfig;
-  questoes: any[];
-}
-
-interface Student {
-  id: string;
-  name: string;
-  joinedAt: Date;
-}
 
 export const StudentWaitingRoom: React.FC = () => {
   const navigate = useNavigate();

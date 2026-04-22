@@ -1,19 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { validateProfessorLogin, Professor } from '@/data/mockUsers';
+import { validateProfessorLogin } from '@/data/mockUsers';
 
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  type: 'professor' | 'student';
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
+import { AuthContextType, User } from "@/types/type";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

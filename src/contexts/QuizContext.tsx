@@ -1,49 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
-
-export interface QuizQuestion {
-  id: string;
-  enunciado: string;
-  alternativas: {
-    texto: string;
-    correta: boolean;
-  }[];
-  tipo: 'texto' | 'imagem' | 'video' | 'mista';
-}
-
-export interface QuizConfig {
-  nivel: string;
-  categorias: {
-    texto: boolean;
-    imagem: boolean;
-    video: boolean;
-    misturado: boolean;
-  };
-  tempoPorQuestao: number;
-  quantidadeQuestoes: number;
-  titulo?: string;
-}
-
-export interface Quiz {
-  id: string;
-  config: QuizConfig;
-  questoes: QuizQuestion[];
-  criadoEm: Date;
-}
-
-interface QuizContextType {
-  currentQuiz: Quiz | null;
-  savedQuizzes: Quiz[];
-  setConfig: (config: QuizConfig) => void;
-  addQuestion: (question: QuizQuestion) => void;
-  updateQuestion: (id: string, question: QuizQuestion) => void;
-  deleteQuestion: (id: string) => void;
-  reorderQuestions: (fromIndex: number, toIndex: number) => void;
-  saveQuiz: () => void;
-  deleteQuiz: (id: string) => void;
-  resetCurrentQuiz: () => void;
-  loadQuizzes: () => void;
-}
+import { QuizConfig,QuizQuestion,Quiz,QuizContextType } from "@/types/type";
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
