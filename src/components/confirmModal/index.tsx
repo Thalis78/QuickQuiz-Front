@@ -1,15 +1,5 @@
 import React from 'react';
-
-interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  description: string;
-  confirmText?: string;
-  cancelText?: string;
-  variant?: 'danger' | 'success';
-}
+import { ConfirmModalProps } from "@/types/type";
 
 export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isOpen,

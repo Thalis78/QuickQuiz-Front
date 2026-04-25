@@ -1,5 +1,8 @@
 import React from "react";
 
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+}
 export const FormField = ({
   label,
   children,
@@ -15,9 +18,6 @@ export const FormField = ({
   </div>
 );
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-}
 
 export const FormInput = ({ label, ...props }: InputProps) => (
   <FormField label={label}>

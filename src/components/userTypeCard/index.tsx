@@ -1,12 +1,5 @@
 import React from 'react';
-
-interface UserTypeCardProps {
-  type: 'student' | 'teacher';
-  title: string;
-  iconSrc: string;
-  iconAlt: string;
-  onClick?: () => void;
-}
+import { UserTypeCardProps } from "@/types/type";
 
 export const UserTypeCard: React.FC<UserTypeCardProps> = ({
   type,

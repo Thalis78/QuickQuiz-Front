@@ -7,12 +7,8 @@ import { ConfirmModal } from "@/components/confirmModal";
 import { useQuiz } from "@/contexts/QuizContext";
 import { socketService } from "@/services/socketService";
 import { toast } from "sonner";
+import { Student } from "@/types/type";
 
-interface Student {
-  id: string;
-  name: string;
-  joinedAt: Date;
-}
 
 export const QuizRoomPage: React.FC = () => {
   const navigate = useNavigate();

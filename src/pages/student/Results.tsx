@@ -2,13 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Trophy, Medal, Award, Home } from "lucide-react";
 import { Layout } from "@/components/layout";
-
-interface Result {
-  id: string;
-  name: string;
-  score: number;
-  totalQuestions: number;
-}
+import { Result } from "@/types/type";
 
 export const StudentResultsPage: React.FC = () => {
   const navigate = useNavigate();

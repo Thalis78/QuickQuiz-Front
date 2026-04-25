@@ -4,11 +4,8 @@ import { Timer, CheckCircle } from "lucide-react";
 import { Layout } from "@/components/layout";
 import { socketService } from "@/services/socketService";
 import { toast } from "@/hooks/use-toast";
+import { QuestionData } from "@/types/type";
 
-interface QuestionData {
-  enunciado: string;
-  alternativas: { texto: string }[];
-}
 
 export const StudentQuizPage: React.FC = () => {
   const navigate = useNavigate();

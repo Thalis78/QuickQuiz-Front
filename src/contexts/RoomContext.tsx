@@ -1,32 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Quiz } from './QuizContext';
-
-export interface Student {
-  id: string;
-  name: string;
-  joinedAt: Date;
-}
-
-export interface Room {
-  id: string;
-  code: string;
-  quiz: Quiz;
-  students: Student[];
-  status: 'waiting' | 'playing' | 'finished';
-  createdAt: Date;
-  startedAt?: Date;
-}
-
-interface RoomContextType {
-  currentRoom: Room | null;
-  createRoom: (quiz: Quiz) => string;
-  addStudent: (studentName: string) => void;
-  removeStudent: (studentId: string) => void;
-  startQuiz: () => void;
-  endQuiz: () => void;
-  getRoomByCode: (code: string) => Room | null;
-  closeRoom: () => void;
-}
+import { Quiz,Student,Room,RoomContextType } from "@/types/type";
 
 const RoomContext = createContext<RoomContextType | undefined>(undefined);
 

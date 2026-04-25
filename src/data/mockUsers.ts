@@ -1,10 +1,4 @@
-// Interface de professor
-export interface Professor {
-  id: string;
-  name: string;
-  email: string;
-  type: 'professor';
-}
+import { Professor } from "@/types/type";
 
 const API_URL = 'http://localhost:3001/api';
 
