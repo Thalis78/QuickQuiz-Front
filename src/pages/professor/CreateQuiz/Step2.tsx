@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown, X } from "lucide-react";
-import { useQuiz, QuizQuestion } from "@/contexts/QuizContext";
+import { useQuiz } from "@/contexts/QuizContext";
 import { toast } from "@/hooks/use-toast";
 import { Layout } from "@/components/layout";
 import { FormField } from "@/components/formComponents";
+import { QuizQuestion} from "@/types/type";
+
+
 
 export const CreateQuizStep2: React.FC = () => {
   const navigate = useNavigate();
