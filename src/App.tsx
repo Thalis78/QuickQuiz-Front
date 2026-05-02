@@ -1,7 +1,6 @@
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/toaster";
-import { Toaster as Sonner } from "@/components/sonner";
+
 import { TooltipProvider } from "@/components/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QuizProvider } from "@/contexts/QuizContext";
@@ -19,8 +18,6 @@ const App = () => (
             <BrowserRouter>
               <AppRoutes />
             </BrowserRouter>
-            <Toaster />
-            <Sonner />
           </TooltipProvider>
         </RoomProvider>
       </QuizProvider>
