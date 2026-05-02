@@ -30,26 +30,27 @@ export const Toast = ({
   };
 
   return (
-    <div className="fixed top-6 left-0 right-0 z-[10002] flex justify-center px-4 pointer-events-none">
+    <div className="fixed top-20 inset-x-0 z-[10002] flex justify-center px-4 pointer-events-none">
       <div
         className={`
           ${variants[variant]}
           pointer-events-auto
-          flex items-center gap-4
-          px-5 py-3 rounded-xl
+          flex items-start justify-between gap-4
+          px-6 py-3.5 rounded-2xl
           text-white border
           shadow-[0_20px_50px_rgba(0,0,0,0.3)]
-          animate-in fade-in slide-in-from-top-8 duration-300
-          max-w-fit
+          animate-in fade-in slide-in-from-top-4
+          duration-300
+          w-full sm:max-w-md
         `}
       >
-        <span className="text-[11px] font-bold uppercase tracking-widest whitespace-nowrap">
+        <span className="flex-1 text-[11px] font-bold uppercase tracking-widest leading-normal break-words">
           {message}
         </span>
 
         <button
           onClick={onClose}
-          className="p-1 rounded-full hover:bg-white/10 transition-colors"
+          className="p-1 -mr-1 rounded-full hover:bg-white/10 transition-colors flex-shrink-0 mt-0.5"
         >
           <X size={14} strokeWidth={3} />
         </button>
