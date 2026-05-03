@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Users, Clock, BookOpen, LogOut, Info } from "lucide-react";
 import { ConfirmModal } from "@/components/confirmModal";
 import { socketService } from "@/services/socketService";
-import { toast } from "sonner";
+import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
-import { Quiz,Student } from "@/types/type";
-
+import { Quiz, Student } from "@/types/type";
 
 export const StudentWaitingRoom: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +18,21 @@ export const StudentWaitingRoom: React.FC = () => {
   const [totalStudents, setTotalStudents] = useState<number>(0);
   const [leaveModal, setLeaveModal] = useState(false);
 
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
+
+  const showToast = useCallback(
+    (message: string, variant: "success" | "error" = "success") => {
+      setToastConfig({ message, variant });
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!code) {
       navigate("/");
@@ -30,7 +44,7 @@ export const StudentWaitingRoom: React.FC = () => {
     const storedRoomCode = sessionStorage.getItem("roomCode");
 
     if (!storedStudentId || !storedStudentName || storedRoomCode !== code) {
-      toast.error("Sessão inválida. Faça login novamente.");
+      showToast("Sessão inválida. Faça login novamente.", "error");
       navigate(`/aluno/entrar/${code}`);
       return;
     }
@@ -58,7 +72,6 @@ export const StudentWaitingRoom: React.FC = () => {
       }
     }
 
-    // Socket Listeners
     socketService.onStudentJoined((data) => {
       setTotalStudents(data.totalStudents);
       setStudents((prev) => {
@@ -67,7 +80,7 @@ export const StudentWaitingRoom: React.FC = () => {
         return [...prev, data.student];
       });
       if (data.student.id !== storedStudentId) {
-        toast.success(`${data.student.name} entrou na sala.`);
+        showToast(`${data.student.name} entrou na sala.`, "success");
       }
     });
 
@@ -75,17 +88,19 @@ export const StudentWaitingRoom: React.FC = () => {
       setTotalStudents(data.totalStudents);
       setStudents((prev) => prev.filter((s) => s.id !== data.studentId));
       if (data.studentId !== storedStudentId) {
-        toast.info(`${data.studentName} saiu da sala.`);
+        showToast(`${data.studentName} saiu da sala.`, "error");
       }
     });
 
     socketService.onQuizStarted((data) => {
-      toast.success("Quiz iniciado! Boa sorte!");
-      navigate(`/aluno/quiz/${code}`, { state: { questionData: data } });
+      showToast("Quiz iniciado! Boa sorte!", "success");
+      setTimeout(() => {
+        navigate(`/aluno/quiz/${code}`, { state: { questionData: data } });
+      }, 500);
     });
 
     socketService.onRoomClosed(() => {
-      toast.error("O professor encerrou a sala.");
+      showToast("O professor encerrou a sala.", "error");
       navigate("/");
     });
 
@@ -95,12 +110,12 @@ export const StudentWaitingRoom: React.FC = () => {
       socketService.off("quiz-started");
       socketService.off("room-closed");
     };
-  }, [code, navigate]);
+  }, [code, navigate, showToast]);
 
   const handleLeaveRoom = () => {
     if (!code || !studentId) return;
     socketService.leaveRoom(code, studentId);
-    toast.success("Você saiu da sala.");
+    showToast("Você saiu da sala.", "success");
     sessionStorage.clear();
     navigate("/");
   };
@@ -109,7 +124,7 @@ export const StudentWaitingRoom: React.FC = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center pt-32">
-          <div className="text-[#605BEF] text-xl font-bold animate-bounce">
+          <div className="text-[#605BEF] text-xl font-bold animate-pulse">
             Carregando sala...
           </div>
         </div>
@@ -119,10 +134,15 @@ export const StudentWaitingRoom: React.FC = () => {
 
   return (
     <Layout>
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
       <main className="flex flex-col items-center px-4 pt-32 pb-12">
         <div className="w-full max-w-4xl space-y-6">
-          {/* Card de Status Principal */}
-          <div className="bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
+          <div className="bg-gray-50 rounded-3xl p-8 border-4 border-[#4441AA] shadow-2xl">
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-700 px-6 py-2 rounded-full font-bold text-sm md:text-base mb-6 border border-amber-200">
                 <Clock size={20} className="animate-pulse" />
@@ -135,36 +155,34 @@ export const StudentWaitingRoom: React.FC = () => {
               <p className="text-gray-600">
                 Prepare-se,{" "}
                 <span className="font-bold text-[#4441AA]">{studentName}</span>!
-                O desafio começará em breve.
               </p>
             </div>
 
-            {/* Info do Quiz */}
             {quiz && (
-              <div className="bg-[#605BEF] rounded-xl p-6 text-white mb-8 shadow-inner">
+              <div className="bg-[#605BEF] rounded-2xl p-6 text-white mb-8 shadow-inner">
                 <div className="flex items-center gap-3 mb-6 border-b border-white/20 pb-4">
                   <BookOpen size={24} />
-                  <h2 className="text-xl font-bold uppercase tracking-tight">
+                  <h2 className="text-xl font-bold uppercase tracking-tight truncate">
                     {quiz.config.titulo}
                   </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">
+                  <div className="bg-black/10 rounded-xl p-3 text-center border border-white/10">
+                    <p className="text-white/70 text-[10px] uppercase font-black">
                       Nível
                     </p>
                     <p className="text-lg font-bold">{quiz.config.nivel}</p>
                   </div>
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">
+                  <div className="bg-black/10 rounded-xl p-3 text-center border border-white/10">
+                    <p className="text-white/70 text-[10px] uppercase font-black">
                       Questões
                     </p>
                     <p className="text-lg font-bold">{quiz.questoes.length}</p>
                   </div>
-                  <div className="bg-black/10 rounded-lg p-3 text-center">
-                    <p className="text-white/70 text-xs uppercase font-bold">
-                      Tempo/Questão
+                  <div className="bg-black/10 rounded-xl p-3 text-center border border-white/10">
+                    <p className="text-white/70 text-[10px] uppercase font-black">
+                      Tempo
                     </p>
                     <p className="text-lg font-bold">
                       {quiz.config.tempoPorQuestao}s
@@ -174,16 +192,15 @@ export const StudentWaitingRoom: React.FC = () => {
               </div>
             )}
 
-            {/* Lista de participantes */}
-            <div className="bg-white border-2 border-gray-100 rounded-xl p-6">
+            <div className="bg-white border-2 border-gray-100 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <Users size={22} className="text-[#605BEF]" />
                   <h3 className="text-lg font-bold text-gray-800">
-                    Participantes na Sala
+                    Participantes
                   </h3>
                 </div>
-                <span className="bg-[#605BEF] text-white px-3 py-1 rounded-full text-sm font-bold">
+                <span className="bg-[#605BEF] text-white px-3 py-1 rounded-full text-xs font-bold">
                   {totalStudents} conectados
                 </span>
               </div>
@@ -194,7 +211,7 @@ export const StudentWaitingRoom: React.FC = () => {
                     key={student.id}
                     className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                       student.id === studentId
-                        ? "bg-indigo-50 border-[#605BEF] ring-1 ring-[#605BEF]"
+                        ? "bg-indigo-50 border-[#605BEF]"
                         : "bg-gray-50 border-gray-200"
                     }`}
                   >
@@ -212,7 +229,9 @@ export const StudentWaitingRoom: React.FC = () => {
                     >
                       {student.name}{" "}
                       {student.id === studentId && (
-                        <span className="text-[10px] font-normal">(Você)</span>
+                        <span className="text-[10px] font-normal opacity-70">
+                          (Você)
+                        </span>
                       )}
                     </p>
                   </div>
@@ -221,32 +240,27 @@ export const StudentWaitingRoom: React.FC = () => {
             </div>
           </div>
 
-          {/* Card de Instruções */}
           <div className="bg-white/80 rounded-2xl p-6 border-2 border-dashed border-[#605BEF]/40 shadow-sm flex gap-4">
             <div className="bg-[#605BEF]/10 p-3 rounded-full h-fit">
               <Info className="text-[#605BEF]" size={24} />
             </div>
             <div>
-              <h3 className="font-bold text-[#605BEF] mb-1">
-                Dica Importante:
-              </h3>
+              <h3 className="font-bold text-[#605BEF] mb-1">Dica:</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Mantenha esta tela aberta. Assim que o professor iniciar o quiz,
-                você será levado automaticamente para a primeira pergunta.{" "}
-                <strong>Prepare sua conexão!</strong>
+                Mantenha esta tela aberta. O início será automático. Prepare-se
+                para o desafio!
               </p>
             </div>
           </div>
 
-          {/* Botão de sair */}
           <div className="flex justify-center">
             <button
               onClick={() => setLeaveModal(true)}
-              className="group text-gray-500 hover:text-red-500 font-medium transition-colors flex items-center gap-2"
+              className="group text-gray-400 hover:text-red-500 font-medium transition-colors flex items-center gap-2 text-sm"
             >
               <LogOut
-                size={18}
-                className="group-hover:translate-x-[-2px] transition-transform"
+                size={16}
+                className="group-hover:-translate-x-1 transition-transform"
               />
               Sair desta sala
             </button>
@@ -259,9 +273,8 @@ export const StudentWaitingRoom: React.FC = () => {
         onClose={() => setLeaveModal(false)}
         onConfirm={handleLeaveRoom}
         title="Sair da Sala"
-        description="Deseja realmente sair da espera? Você perderá sua conexão com este quiz."
+        description="Deseja realmente sair da espera?"
         confirmText="Sair Agora"
-        cancelText="Continuar Esperando"
         variant="danger"
       />
     </Layout>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 
 export const ProfessorLogin: React.FC = () => {
@@ -13,6 +13,21 @@ export const ProfessorLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
+
+  const showToast = (
+    message: string,
+    variant: "success" | "error" = "success",
+  ) => {
+    setToastConfig({ message, variant });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -21,13 +36,15 @@ export const ProfessorLogin: React.FC = () => {
       const result = await login(email, password);
 
       if (result.success) {
-        toast.success("Bem-vindo ao English Quizz CIEL CURSOS!");
-        navigate("/professor/dashboard");
+        showToast("Bem-vindo ao English Quizz CIEL CURSOS!", "success");
+        setTimeout(() => {
+          navigate("/professor/dashboard");
+        }, 800);
       } else {
-        toast.error(result.error || "Credenciais inválidas.");
+        showToast(result.error || "Credenciais inválidas.", "error");
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao tentar fazer login.");
+      showToast("Ocorreu um erro ao tentar fazer login.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -35,6 +52,12 @@ export const ProfessorLogin: React.FC = () => {
 
   return (
     <Layout>
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
       <main className="flex flex-col items-center justify-center px-4 pt-32 pb-12">
         <div className="w-full max-w-md bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
           <div className="flex flex-col items-center mb-8">

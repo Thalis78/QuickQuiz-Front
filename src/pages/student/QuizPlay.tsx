@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Timer, CheckCircle } from "lucide-react";
 import { Layout } from "@/components/layout";
 import { socketService } from "@/services/socketService";
-import { toast } from "@/hooks/use-toast";
+import { Toast } from "@/components/toast";
 import { QuestionData } from "@/types/type";
-
 
 export const StudentQuizPage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,23 +18,32 @@ export const StudentQuizPage: React.FC = () => {
   );
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
-  const [timeLimit, setTimeLimit] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [hasAnswered, setHasAnswered] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
+
+  const showToast = useCallback(
+    (message: string, variant: "success" | "error" = "success") => {
+      setToastConfig({ message, variant });
+    },
+    [],
+  );
+
   useEffect(() => {
-    // Recupera dados do sessionStorage
     const storedStudentId = sessionStorage.getItem("studentId");
     const storedStudentName = sessionStorage.getItem("studentName");
 
     if (!storedStudentId || !storedStudentName) {
-      toast({
-        title: "Sessão inválida",
-        description: "Faça login novamente.",
-        variant: "destructive",
-      });
+      showToast("Sessão inválida. Faça login novamente.", "error");
       navigate(`/aluno/entrar/${code}`);
       return;
     }
@@ -43,50 +51,30 @@ export const StudentQuizPage: React.FC = () => {
     setStudentId(storedStudentId);
     setStudentName(storedStudentName);
 
-    // Carrega dados da primeira questão se vieram do state (navegação da sala de espera)
     const questionData = (location.state as any)?.questionData;
     if (questionData) {
-      console.log("📝 Carregando questão do state:", questionData);
-      console.log(
-        `⏱️ Questão ${questionData.questionIndex + 1} - Timer configurado: ${questionData.timeLimit}s`,
-      );
       setCurrentQuestion(questionData.question);
       setQuestionIndex(questionData.questionIndex);
       setTotalQuestions(questionData.totalQuestions);
-      setTimeLimit(questionData.timeLimit);
       setTimeRemaining(questionData.timeLimit);
     }
 
-    // Listener para próxima questão
     socketService.onNextQuestion((data) => {
-      console.log(
-        `⏭️ Próxima questão recebida! Timer estava em: ${timeRemaining}s`,
-      );
-      console.log(
-        `📝 Nova questão ${data.questionIndex + 1}/${totalQuestions}`,
-      );
       setCurrentQuestion(data.question);
       setQuestionIndex(data.questionIndex);
-      setTimeLimit(data.timeLimit);
       setTimeRemaining(data.timeLimit);
       setSelectedAnswer("");
       setHasAnswered(false);
     });
 
-    // Listener para quiz finalizado
     socketService.onQuizFinished((data) => {
       navigate(`/aluno/resultados/${code}`, {
         state: { results: data.results },
       });
     });
 
-    // Listener para sala fechada
     socketService.onRoomClosed(() => {
-      toast({
-        title: "Sala fechada",
-        description: "O professor encerrou a sala.",
-        variant: "destructive",
-      });
+      showToast("O professor encerrou a sala.", "error");
       navigate("/");
     });
 
@@ -95,39 +83,17 @@ export const StudentQuizPage: React.FC = () => {
       socketService.off("quiz-finished");
       socketService.off("room-closed");
     };
-  }, [code, navigate]);
+  }, [code, navigate, location.state, showToast]);
 
-  // Timer countdown - continua mesmo após responder
   useEffect(() => {
-    // Só cria timer se tiver tempo restante
     if (timeRemaining <= 0) return;
 
-    console.log(
-      `⏱️ Timer iniciado: ${timeRemaining}s (Questão ${questionIndex + 1})`,
-    );
-
     const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          console.log(
-            `⏰ Timer frontend chegou a 0! Questão ${questionIndex + 1}`,
-          );
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeRemaining((prev) => (prev <= 1 ? 0 : prev - 1));
     }, 1000);
 
-    return () => {
-      console.log(`🛑 Limpando timer da questão ${questionIndex + 1}`);
-      clearInterval(timer);
-    };
-  }, [questionIndex, timeLimit]); // Recria apenas quando muda de questão
-
-  const handleSelectAnswer = (letter: string) => {
-    if (hasAnswered || timeRemaining === 0) return;
-    setSelectedAnswer(letter);
-  };
+    return () => clearInterval(timer);
+  }, [questionIndex, currentQuestion]);
 
   const handleSubmitAnswer = (answer: string) => {
     if (hasAnswered || !code) return;
@@ -143,12 +109,10 @@ export const StudentQuizPage: React.FC = () => {
       (response) => {
         setIsLoading(false);
         if (response.success) {
-          toast({
-            title: answer ? "Resposta enviada!" : "Tempo esgotado",
-            description: answer
-              ? "Aguarde a pr\u00f3xima quest\u00e3o."
-              : "Sua resposta n\u00e3o foi registrada.",
-          });
+          showToast(answer ? "Resposta enviada!" : "Tempo esgotado", "success");
+        } else {
+          showToast("Erro ao enviar resposta.", "error");
+          setHasAnswered(false);
         }
       },
     );
@@ -156,11 +120,7 @@ export const StudentQuizPage: React.FC = () => {
 
   const handleConfirmAnswer = () => {
     if (!selectedAnswer) {
-      toast({
-        title: "Selecione uma alternativa",
-        description: "Escolha uma resposta antes de confirmar.",
-        variant: "destructive",
-      });
+      showToast("Selecione uma alternativa!", "error");
       return;
     }
     handleSubmitAnswer(selectedAnswer);
@@ -169,7 +129,7 @@ export const StudentQuizPage: React.FC = () => {
   if (!currentQuestion) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center bg-[#605BEF]">
-        <div className="text-white text-xl">Carregando questao...</div>
+        <div className="text-white text-xl">Carregando questão...</div>
       </div>
     );
   }
@@ -178,9 +138,14 @@ export const StudentQuizPage: React.FC = () => {
 
   return (
     <Layout>
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
       <main className="relative z-10 flex flex-col items-center px-4 pt-32 pb-12">
         <div className="w-full max-w-4xl">
-          {/* Header com timer e progresso */}
           <div className="bg-white rounded-2xl p-6 shadow-2xl mb-6">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -198,7 +163,7 @@ export const StudentQuizPage: React.FC = () => {
               </div>
 
               <div
-                className={`text-center px-6 py-3 rounded-xl ${
+                className={`text-center px-6 py-3 rounded-xl transition-colors ${
                   timeRemaining <= 5
                     ? "bg-red-500 animate-pulse"
                     : "bg-[#605BEF]"
@@ -211,7 +176,6 @@ export const StudentQuizPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Barra de progresso */}
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
                 className="bg-[#00D9B5] h-3 rounded-full transition-all duration-300"
@@ -220,13 +184,11 @@ export const StudentQuizPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quest\u00e3o */}
           <div className="bg-white rounded-2xl p-8 shadow-2xl mb-6">
             <h2 className="text-2xl font-bold text-[#605BEF] mb-6">
               {currentQuestion.enunciado}
             </h2>
 
-            {/* Alternativas */}
             <div className="grid grid-cols-1 gap-4">
               {currentQuestion.alternativas.map((alt, index) => {
                 const letter = String.fromCharCode(65 + index);
@@ -235,17 +197,21 @@ export const StudentQuizPage: React.FC = () => {
                 return (
                   <button
                     key={index}
-                    onClick={() => handleSelectAnswer(letter)}
+                    onClick={() =>
+                      !hasAnswered &&
+                      timeRemaining > 0 &&
+                      setSelectedAnswer(letter)
+                    }
                     disabled={hasAnswered || timeRemaining === 0}
-                    className={`p-6 rounded-xl text-left transition-all transform hover:scale-102 disabled:cursor-not-allowed ${
+                    className={`p-6 rounded-xl text-left transition-all transform disabled:cursor-not-allowed ${
                       isSelected
-                        ? "bg-[#605BEF] text-white shadow-xl scale-105"
+                        ? "bg-[#605BEF] text-white shadow-xl scale-[1.02]"
                         : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                    } ${hasAnswered || timeRemaining === 0 ? "opacity-50" : ""}`}
+                    } ${hasAnswered || timeRemaining === 0 ? "opacity-60" : ""}`}
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
+                        className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                           isSelected
                             ? "bg-white text-[#605BEF]"
                             : "bg-[#605BEF] text-white"
@@ -253,9 +219,9 @@ export const StudentQuizPage: React.FC = () => {
                       >
                         {letter}
                       </div>
-                      <p className="flex-1 text-lg">{alt.texto}</p>
+                      <p className="flex-1 text-lg font-medium">{alt.texto}</p>
                       {isSelected && !hasAnswered && (
-                        <CheckCircle size={28} className="text-white" />
+                        <CheckCircle size={24} className="text-white" />
                       )}
                     </div>
                   </button>
@@ -264,13 +230,12 @@ export const StudentQuizPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Bot\u00e3o confirmar */}
           {!hasAnswered && timeRemaining > 0 && (
             <div className="text-center">
               <button
                 onClick={handleConfirmAnswer}
                 disabled={!selectedAnswer || isLoading}
-                className="bg-[#00D9B5] hover:bg-[#00C9A5] disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-12 py-4 rounded-xl font-bold text-lg transition-all shadow-lg transform hover:scale-105"
+                className="bg-[#00D9B5] hover:bg-[#00C9A5] disabled:bg-gray-400 text-white px-12 py-4 rounded-xl font-bold text-lg transition-all shadow-lg active:scale-95"
               >
                 {isLoading ? "Enviando..." : "Confirmar Resposta"}
               </button>
@@ -278,11 +243,11 @@ export const StudentQuizPage: React.FC = () => {
           )}
 
           {hasAnswered && (
-            <div className="bg-yellow-100 border-2 border-yellow-400 rounded-xl p-6 text-center">
-              <p className="text-yellow-800 font-bold text-lg">
-                ✅ Resposta enviada!{" "}
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 text-center animate-in fade-in zoom-in duration-300">
+              <p className="text-emerald-800 font-bold text-lg">
+                ✅ Resposta registrada!{" "}
                 {questionIndex < totalQuestions - 1
-                  ? `Aguarde a questão ${questionIndex + 2}...`
+                  ? "Aguarde a próxima questão..."
                   : "Aguarde o resultado final..."}
               </p>
             </div>
