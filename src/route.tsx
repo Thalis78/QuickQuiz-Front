@@ -12,6 +12,7 @@ import { StudentJoinPage } from "./pages/student/JoinRoom";
 import { StudentWaitingRoom } from "./pages/student/WaitingRoom";
 import { StudentQuizPage } from "./pages/student/QuizPlay";
 import { StudentResultsPage } from "./pages/student/Results";
+import { AboutSection } from "./pages/sobre/sobreCiel";
 
 export const AppRoutes = () => {
   return (
@@ -23,6 +24,7 @@ export const AppRoutes = () => {
       <Route path="/aluno/sala/:code" element={<StudentWaitingRoom />} />
       <Route path="/aluno/quiz/:code" element={<StudentQuizPage />} />
       <Route path="/aluno/resultados/:code" element={<StudentResultsPage />} />
+      <Route path="/sobre/ciel" element={<AboutSection />} />
 
       <Route
         path="/professor/dashboard"
