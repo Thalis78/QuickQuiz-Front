@@ -1,151 +1,184 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuiz } from "@/contexts/QuizContext";
-import { toast } from "@/hooks/use-toast";
+import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
-import { FormToggle, FormField, FormInput } from "@/components/formComponents";
+import { FormField, FormInput } from "@/components/formComponents";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
   const { currentQuiz, setConfig } = useQuiz();
 
-  const [titulo, setTitulo] = useState("");
-  const [nivel, setNivel] = useState(currentQuiz?.config.nivel || "A1");
-  const [categorias, setCategorias] = useState(
-    currentQuiz?.config.categorias || {
-      texto: false,
-      imagem: false,
-      video: false,
-      misturado: true,
-    },
-  );
-  const [tempo, setTempo] = useState(
-    currentQuiz?.config.tempoPorQuestao?.toString() || "30",
-  );
-  const [quantidade, setQuantidade] = useState(
-    currentQuiz?.config.quantidadeQuestoes?.toString() || "5",
-  );
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
 
-  const handleCategoriaToggle = (categoria: keyof typeof categorias) => {
-    setCategorias((prev) => ({ ...prev, [categoria]: !prev[categoria] }));
+  const [formData, setFormData] = useState({
+    titulo: currentQuiz?.config.titulo || "",
+    nivel: currentQuiz?.config.nivel || "Fácil",
+    quantidade: currentQuiz?.config.quantidadeQuestoes?.toString() || "5",
+    tempoPorQuestao: currentQuiz?.config.tempoPorQuestao?.toString() || "30",
+  });
+
+  const showToast = (
+    message: string,
+    variant: "success" | "error" = "success",
+  ) => {
+    setToastConfig({ message, variant });
   };
 
   const handleProximaEtapa = () => {
-    const tempoNum = parseInt(tempo);
+    const { titulo, nivel, quantidade, tempoPorQuestao } = formData;
     const quantidadeNum = parseInt(quantidade);
+    const tempoNum = parseInt(tempoPorQuestao);
 
-    if (!titulo.trim())
-      return toast({ title: "Título obrigatório", variant: "destructive" });
-    if (!tempoNum || tempoNum <= 0)
-      return toast({ title: "Tempo inválido", variant: "destructive" });
-    if (!quantidadeNum || quantidadeNum <= 0)
-      return toast({ title: "Quantidade inválida", variant: "destructive" });
-    if (!Object.values(categorias).some((v) => v))
-      return toast({
-        title: "Selecione uma categoria",
-        variant: "destructive",
-      });
+    if (!titulo.trim()) {
+      return showToast("Dê um nome ao seu quiz!", "error");
+    }
+
+    if (!nivel) {
+      return showToast("Selecione um nível de dificuldade!", "error");
+    }
+
+    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+      return showToast(
+        "A quantidade de questões deve ser no mínimo 1.",
+        "error",
+      );
+    }
+
+    if (quantidadeNum > 20) {
+      return showToast("O limite máximo é de 20 questões.", "error");
+    }
+
+    if (isNaN(tempoNum) || tempoNum < 5) {
+      return showToast("O tempo mínimo por questão é de 5 segundos.", "error");
+    }
 
     setConfig({
-      nivel,
-      categorias,
-      tempoPorQuestao: tempoNum,
-      quantidadeQuestoes: quantidadeNum,
+      ...currentQuiz?.config,
       titulo,
+      nivel,
+      quantidadeQuestoes: quantidadeNum,
+      tempoPorQuestao: tempoNum,
     });
-    toast({ title: "Configurações salvas!" });
-    navigate("/professor/quiz/criar/etapa-2");
+
+    showToast("Configurações salvas!", "success");
+
+    setTimeout(() => {
+      navigate("/professor/quiz/criar/etapa-2");
+    }, 800);
   };
 
   return (
     <Layout>
-      <main className="relative z-10 flex flex-col items-center px-4 pt-20 pb-12">
-        <div className="bg-[#3E3B7A] text-white px-12 py-4 rounded-xl mb-8 font-bold text-2xl">
-          Criar Quiz
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
+      <div className="flex flex-col items-center justify-center px-4 py-12 min-h-[calc(100vh-80px)]">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-black text-white tracking-tight drop-shadow-md">
+            Novo Quiz
+          </h1>
+          <p className="text-white/70 font-medium italic">
+            Configure as regras da partida
+          </p>
         </div>
 
-        <div className="w-full max-w-3xl bg-[#3E3B7A] rounded-3xl p-8 shadow-2xl">
-          <div className="text-white text-2xl font-bold mb-6">1 / 3</div>
-          <h2 className="text-white text-center text-3xl font-bold mb-8">
-            Configuração do Quiz
-          </h2>
-
+        <div className="w-full max-w-2xl bg-[#3E3B7A] rounded-[2.5rem] p-8 md:p-10 shadow-2xl border border-white/10">
           <div className="space-y-6">
             <FormInput
-              label="Título do Quiz *"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Ex: Quiz de Inglês"
+              label="Nome do Quiz"
+              value={formData.titulo}
+              onChange={(e) =>
+                setFormData({ ...formData, titulo: e.target.value })
+              }
+              placeholder="Ex: Verb to Be - Practice"
+              className="w-full bg-white border-none text-slate-900 text-lg py-6 px-6 rounded-xl shadow-inner"
             />
 
-            <FormField label="Nível das questões *">
-              <select
-                value={nivel}
-                onChange={(e) => setNivel(e.target.value)}
-                className="w-48 px-4 py-3 rounded-lg bg-white text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
-              >
-                {["A1", "A2", "B1", "B2", "C1", "C2"].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </FormField>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Dificuldade">
+                <div className="flex gap-1 p-1 bg-white/5 rounded-xl border border-white/10 mt-1">
+                  {["Fácil", "Médio", "Difícil"].map((op) => (
+                    <button
+                      key={op}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, nivel: op })}
+                      className={`flex-1 py-2.5 rounded-lg text-xs font-black transition-all duration-200 ${
+                        formData.nivel === op
+                          ? "bg-white text-[#3E3B7A] shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-[1.05]"
+                          : "text-white/40 hover:text-white hover:bg-white/5"
+                      }`}
+                    >
+                      {op}
+                    </button>
+                  ))}
+                </div>
+              </FormField>
 
-            <FormField label="Tipo de questões *">
-              <div className="flex items-center gap-6 flex-wrap">
-                {(["texto", "imagem", "video"] as const).map((cat) => (
-                  <FormToggle
-                    key={cat}
-                    label={cat.charAt(0).toUpperCase() + cat.slice(1)}
-                    checked={categorias[cat]}
-                    onChange={() => handleCategoriaToggle(cat)}
-                  />
-                ))}
-                <div className="w-px h-8 bg-white/30" />
-                <FormToggle
-                  label="Misturado"
-                  checked={categorias.misturado}
-                  onChange={() => handleCategoriaToggle("misturado")}
-                  activeColor="bg-[#00D9B5]"
+              <FormInput
+                label="Nº de Questões (Máx 20)"
+                type="number"
+                value={formData.quantidade}
+                onChange={(e) =>
+                  setFormData({ ...formData, quantidade: e.target.value })
+                }
+                min="1"
+                max="20"
+                className="bg-white border-none text-slate-900 py-3 rounded-xl font-bold"
+              />
+
+              <div className="md:col-span-2 relative">
+                <FormInput
+                  label="Tempo por questão (segundos)"
+                  type="number"
+                  value={formData.tempoPorQuestao}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      tempoPorQuestao: e.target.value,
+                    })
+                  }
+                  min="5"
+                  className="bg-white border-none text-[#3E3B7A] py-4 pl-6 pr-16 rounded-xl text-xl font-black"
                 />
+                <span className="absolute right-4 bottom-3 text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                  Segs
+                </span>
               </div>
-            </FormField>
+            </div>
 
-            <div className="flex gap-4">
-              <FormInput
-                label="Tempo (seg)"
-                type="number"
-                value={tempo}
-                onChange={(e) => setTempo(e.target.value)}
-                className="w-32"
-              />
-              <FormInput
-                label="Quantidade"
-                type="number"
-                value={quantidade}
-                onChange={(e) => setQuantidade(e.target.value)}
-                className="w-32"
-              />
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => navigate("/professor/dashboard")}
+                className="group flex items-center gap-2 text-white/60 font-bold hover:text-white transition-all py-2"
+              >
+                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                <span>Cancelar</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleProximaEtapa}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 text-white border-2 border-white/40 px-12 py-3.5 rounded-full font-black text-lg hover:bg-white hover:text-[#3E3B7A] hover:border-white transition-all active:scale-95"
+              >
+                Próxima Etapa
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
-
-          <div className="flex justify-center gap-4 mt-10">
-            <button
-              onClick={() => navigate("/professor/dashboard")}
-              className="bg-[#5B54D8] text-white px-8 py-3 rounded-full font-bold"
-            >
-              ← Voltar ao Dashboard
-            </button>
-            <button
-              onClick={handleProximaEtapa}
-              className="bg-[#7B73E8] hover:bg-[#6B63D8] text-white px-10 py-3 rounded-full font-bold text-lg transition-colors flex items-center gap-2"
-            >
-              Próxima etapa <span>→</span>
-            </button>
-          </div>
         </div>
-      </main>
+      </div>
     </Layout>
   );
 };

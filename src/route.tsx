@@ -5,8 +5,6 @@ import Index from "./pages/Index";
 import { ProfessorLogin } from "./pages/professor/Login";
 import { ProfessorDashboard } from "./pages/professor/Dashboard";
 import { CreateQuizStep1 } from "./pages/professor/CreateQuiz/Step1";
-import { CreateQuizStep2 } from "./pages/professor/CreateQuiz/Step2";
-import { CreateQuizStep3 } from "./pages/professor/CreateQuiz/Step3";
 import { QuizRoomPage } from "./pages/professor/QuizRoom";
 import { StudentJoinPage } from "./pages/student/JoinRoom";
 import { StudentWaitingRoom } from "./pages/student/WaitingRoom";
@@ -39,22 +37,6 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <CreateQuizStep1 />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/professor/quiz/criar/etapa-2"
-        element={
-          <ProtectedRoute>
-            <CreateQuizStep2 />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/professor/quiz/criar/etapa-3"
-        element={
-          <ProtectedRoute>
-            <CreateQuizStep3 />
           </ProtectedRoute>
         }
       />

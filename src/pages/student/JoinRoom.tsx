@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LogIn, ArrowLeft } from "lucide-react";
 import { socketService } from "@/services/socketService";
-import { toast } from "sonner";
+import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 
 export const StudentJoinPage: React.FC = () => {
@@ -13,31 +13,43 @@ export const StudentJoinPage: React.FC = () => {
   const [studentName, setStudentName] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
 
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
+
+  const showToast = useCallback(
+    (message: string, variant: "success" | "error" = "success") => {
+      setToastConfig({ message, variant });
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!socketService.isConnected()) {
       socketService.connect().catch(() => {
-        toast.error("Não foi possível conectar ao servidor. Tente novamente.");
+        showToast("Não foi possível conectar ao servidor.", "error");
       });
     }
-  }, []);
+  }, [showToast]);
 
   const handleJoinRoom = async () => {
     if (!studentName.trim()) {
-      toast.error("Digite seu nome para entrar na sala.");
-      return;
+      return showToast("Digite seu nome para entrar na sala.", "error");
     }
 
     if (!roomCode.trim()) {
-      toast.error("Digite o código da sala.");
-      return;
+      return showToast("Digite o código da sala.", "error");
     }
 
     if (!socketService.isConnected()) {
       try {
         await socketService.connect();
       } catch (error) {
-        toast.error("Erro de conexão. Verifique sua internet.");
-        return;
+        return showToast("Erro de conexão. Verifique sua internet.", "error");
       }
     }
 
@@ -64,10 +76,16 @@ export const StudentJoinPage: React.FC = () => {
             JSON.stringify(response.students),
           );
 
-        toast.success(`Bem-vindo à sala, ${studentName.trim()}!`);
-        navigate(`/aluno/sala/${roomCode.trim()}`);
+        showToast(`Bem-vindo, ${studentName.trim()}!`, "success");
+
+        setTimeout(() => {
+          navigate(`/aluno/sala/${roomCode.trim()}`);
+        }, 500);
       } else {
-        toast.error(response.error || "Não foi possível entrar na sala.");
+        showToast(
+          response.error || "Não foi possível entrar na sala.",
+          "error",
+        );
       }
     });
   };
@@ -78,6 +96,12 @@ export const StudentJoinPage: React.FC = () => {
 
   return (
     <Layout>
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
       <main className="flex flex-col items-center justify-center px-4 pt-32 pb-12">
         <div className="w-full max-w-md bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
           <div className="flex flex-col items-center mb-8">
@@ -93,7 +117,6 @@ export const StudentJoinPage: React.FC = () => {
           </div>
 
           <div className="space-y-5 w-full">
-            {/* Nome do aluno */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Seu Nome
@@ -104,13 +127,12 @@ export const StudentJoinPage: React.FC = () => {
                 onChange={(e) => setStudentName(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ex: João Silva"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] focus:border-transparent outline-none transition"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] outline-none transition"
                 maxLength={50}
                 autoFocus
               />
             </div>
 
-            {/* Código da sala */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Código da Sala
@@ -123,7 +145,7 @@ export const StudentJoinPage: React.FC = () => {
                 }
                 onKeyPress={handleKeyPress}
                 placeholder="000000"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] focus:border-transparent outline-none transition text-center text-2xl font-bold tracking-widest"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] outline-none transition text-center text-2xl font-bold tracking-widest"
                 maxLength={6}
                 disabled={!!urlCode}
               />
@@ -137,17 +159,15 @@ export const StudentJoinPage: React.FC = () => {
             <button
               onClick={handleJoinRoom}
               disabled={isConnecting}
-              className="w-full bg-[#605BEF] text-white py-4 rounded-lg font-bold hover:bg-[#4f4bd9] transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
+              className="w-full bg-[#605BEF] text-white py-4 rounded-lg font-bold hover:bg-[#4f4bd9] transition duration-200 disabled:opacity-50 shadow-md flex items-center justify-center gap-2"
             >
               <LogIn size={20} />
               {isConnecting ? "Conectando..." : "Entrar na Sala"}
             </button>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center flex items-center justify-center gap-1">
-              <span>💡</span> Aguarde o professor iniciar a partida após entrar.
-            </p>
+          <div className="mt-6 pt-6 border-t border-gray-200 text-xs text-gray-500 text-center flex items-center justify-center gap-1">
+            <span>💡</span> Aguarde o professor iniciar a partida após entrar.
           </div>
 
           <div className="mt-6 text-center">

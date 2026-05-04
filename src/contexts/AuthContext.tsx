@@ -1,16 +1,23 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { validateProfessorLogin } from '@/data/mockUsers';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { validateProfessorLogin } from "@/data/mockUsers";
 
 import { AuthContextType, User } from "@/types/type";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const SESSION_KEY = 'ciel_auth_session';
+const SESSION_KEY = "ciel_auth_session";
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Carregar sessão do localStorage ao iniciar
   useEffect(() => {
     const savedSession = localStorage.getItem(SESSION_KEY);
     if (savedSession) {
@@ -18,16 +25,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const userData = JSON.parse(savedSession);
         setUser(userData);
       } catch (error) {
-        console.error('Erro ao carregar sessão:', error);
+        console.error("Erro ao carregar sessão:", error);
         localStorage.removeItem(SESSION_KEY);
       }
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    // Validar contra backend (verifica se email está na lista autorizada)
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     const professor = await validateProfessorLogin(email, password);
-    
+
     if (professor) {
       const userData: User = {
         id: professor.id,
@@ -35,17 +44,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         name: professor.name,
         type: professor.type,
       };
-      
+
       setUser(userData);
-      // Salvar sessão no localStorage
       localStorage.setItem(SESSION_KEY, JSON.stringify(userData));
-      
+
       return { success: true };
     }
-    
-    return { 
-      success: false, 
-      error: 'Email ou senha incorretos. Apenas professores autorizados podem acessar.' 
+
+    return {
+      success: false,
+      error:
+        "Email ou senha incorretos. Apenas professores autorizados podem acessar.",
     };
   };
 
@@ -66,7 +75,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

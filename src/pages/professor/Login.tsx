@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
+import { getEmailSuggestions } from "@/utils/apiUtils";
 
 export const ProfessorLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -13,21 +14,49 @@ export const ProfessorLogin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  const [toastConfig, setToastConfig] = useState<{
+    message: string | null;
+    variant: "success" | "error";
+  }>({
+    message: null,
+    variant: "success",
+  });
+
+  const showToast = (
+    message: string,
+    variant: "success" | "error" = "success",
+  ) => {
+    setToastConfig({ message, variant });
+  };
+
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    const suggestionsList = getEmailSuggestions(value);
+    setSuggestions(suggestionsList);
+  };
+
+  const handleSelectSuggestion = (suggestion: string) => {
+    setEmail(suggestion);
+    setSuggestions([]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuggestions([]);
     setIsLoading(true);
 
     try {
       const result = await login(email, password);
-
       if (result.success) {
-        toast.success("Bem-vindo ao English Quizz CIEL CURSOS!");
-        navigate("/professor/dashboard");
+        showToast("Bem-vindo ao English Quizz CIEL CURSOS!", "success");
+        setTimeout(() => navigate("/professor/dashboard"), 800);
       } else {
-        toast.error(result.error || "Credenciais inválidas.");
+        showToast(result.error || "Credenciais inválidas.", "error");
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao tentar fazer login.");
+      showToast("Ocorreu um erro ao tentar fazer login.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -35,6 +64,12 @@ export const ProfessorLogin: React.FC = () => {
 
   return (
     <Layout>
+      <Toast
+        message={toastConfig.message}
+        variant={toastConfig.variant}
+        onClose={() => setToastConfig((prev) => ({ ...prev, message: null }))}
+      />
+
       <main className="flex flex-col items-center justify-center px-4 pt-32 pb-12">
         <div className="w-full max-w-md bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
           <div className="flex flex-col items-center mb-8">
@@ -48,7 +83,7 @@ export const ProfessorLogin: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 w-full">
-            <div>
+            <div className="relative">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
@@ -59,11 +94,26 @@ export const ProfessorLogin: React.FC = () => {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] focus:border-transparent outline-none transition"
                 placeholder="seu.email@exemplo.com"
                 required
+                autoComplete="off"
               />
+
+              {suggestions.length > 0 && (
+                <ul className="absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-xl overflow-hidden">
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handleSelectSuggestion(suggestion)}
+                      className="px-4 py-3 text-sm text-gray-700 hover:bg-[#605BEF] hover:text-white cursor-pointer transition-colors border-b last:border-b-0 border-gray-100"
+                    >
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div>
