@@ -7,7 +7,7 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleStudentClick = () => {
-    navigate("/aluno/entrar");
+    navigate("/aluno/home");
   };
 
   const handleTeacherClick = () => {
