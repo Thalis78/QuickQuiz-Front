@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
+import { getEmailSuggestions } from "@/utils/apiUtils";
 
 export const ProfessorLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export const ProfessorLogin: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const [toastConfig, setToastConfig] = useState<{
     message: string | null;
@@ -28,18 +31,27 @@ export const ProfessorLogin: React.FC = () => {
     setToastConfig({ message, variant });
   };
 
+  const handleEmailChange = (value: string) => {
+    setEmail(value);
+    const suggestionsList = getEmailSuggestions(value);
+    setSuggestions(suggestionsList);
+  };
+
+  const handleSelectSuggestion = (suggestion: string) => {
+    setEmail(suggestion);
+    setSuggestions([]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSuggestions([]);
     setIsLoading(true);
 
     try {
       const result = await login(email, password);
-
       if (result.success) {
         showToast("Bem-vindo ao English Quizz CIEL CURSOS!", "success");
-        setTimeout(() => {
-          navigate("/professor/dashboard");
-        }, 800);
+        setTimeout(() => navigate("/professor/dashboard"), 800);
       } else {
         showToast(result.error || "Credenciais inválidas.", "error");
       }
@@ -71,7 +83,7 @@ export const ProfessorLogin: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5 w-full">
-            <div>
+            <div className="relative">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
@@ -82,11 +94,26 @@ export const ProfessorLogin: React.FC = () => {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => handleEmailChange(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#605BEF] focus:border-transparent outline-none transition"
                 placeholder="seu.email@exemplo.com"
                 required
+                autoComplete="off"
               />
+
+              {suggestions.length > 0 && (
+                <ul className="absolute z-50 w-full bg-white border border-gray-200 mt-1 rounded-lg shadow-xl overflow-hidden">
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      onClick={() => handleSelectSuggestion(suggestion)}
+                      className="px-4 py-3 text-sm text-gray-700 hover:bg-[#605BEF] hover:text-white cursor-pointer transition-colors border-b last:border-b-0 border-gray-100"
+                    >
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div>
