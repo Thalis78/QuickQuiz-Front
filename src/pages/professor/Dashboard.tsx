@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { useQuiz } from "@/contexts/QuizContext";
 import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 
 export const ProfessorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const { loadQuizzes } = useQuiz();
 
   const [toastConfig, setToastConfig] = useState<{
@@ -30,7 +28,6 @@ export const ProfessorDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
     showToast("Logout realizado! Até logo!", "success");
     setTimeout(() => {
       navigate("/");
@@ -54,7 +51,7 @@ export const ProfessorDashboard: React.FC = () => {
                   Dashboard do Professor
                 </h1>
                 <p className="text-[#605BEF] font-bold text-lg">
-                  Bem-vindo, {user?.name}!
+                  Bem-vindo, Professor(a)!
                 </p>
                 <p className="text-[#605BEF] font-semibold opacity-80">
                   Gerencie seus quizzes aqui.
