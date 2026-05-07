@@ -2,11 +2,11 @@ import { Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/utils/ProtectedRoute";
 
 import Index from "./pages/Index";
-import { ProfessorLogin } from "./pages/professor/login";
-import { ProfessorDashboard } from "./pages/professor/dashboard";
 import { CreateQuizStep1 } from "./pages/professor/gerarQuiz";
 import { AboutSection } from "./pages/sobre/sobreCiel";
 import { Home } from "./pages/aluno/home";
+import { ProfessorDashboard } from "./pages/professor/Dashboard";
+import { ProfessorLogin } from "./pages/professor/Login";
 
 export const AppRoutes = () => {
   return (

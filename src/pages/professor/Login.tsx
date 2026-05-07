@@ -4,6 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 import { getEmailSuggestions } from "@/utils/apiUtils";
+import { login } from "@/api/login";
 
 export const ProfessorLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -11,7 +12,6 @@ export const ProfessorLogin: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
   const [toastConfig, setToastConfig] = useState<{
@@ -46,12 +46,18 @@ export const ProfessorLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      if (true) {
+      const data = await login(email, password);
+
+      if (data.success) {
         showToast("Bem-vindo ao English Quizz CIEL CURSOS!", "success");
-        setTimeout(() => navigate("/professor/dashboard"), 800);
+
+        setTimeout(() => {
+          navigate("/professor/dashboard");
+        }, 1000);
       }
-    } catch (error) {
-      showToast("Ocorreu um erro ao tentar fazer login.", "error");
+    } catch (error: any) {
+      const errorMsg = error.message || "E-mail ou senha incorretos.";
+      showToast(errorMsg, "error");
     } finally {
       setIsLoading(false);
     }
