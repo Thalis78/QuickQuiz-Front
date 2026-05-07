@@ -22,6 +22,7 @@ export const ProfessorDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("@App:token");
     showToast("Logout realizado! Até logo!", "success");
     setTimeout(() => {
       navigate("/");
