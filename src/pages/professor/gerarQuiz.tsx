@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuiz } from "@/contexts/QuizContext";
 import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 import { FormField, FormInput } from "@/components/formComponents";
@@ -8,7 +7,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
-  const { currentQuiz, setConfig } = useQuiz();
 
   const [toastConfig, setToastConfig] = useState<{
     message: string | null;
@@ -19,10 +17,10 @@ export const CreateQuizStep1: React.FC = () => {
   });
 
   const [formData, setFormData] = useState({
-    titulo: currentQuiz?.config.titulo || "",
-    nivel: currentQuiz?.config.nivel || "Fácil",
-    quantidade: currentQuiz?.config.quantidadeQuestoes?.toString() || "5",
-    tempoPorQuestao: currentQuiz?.config.tempoPorQuestao?.toString() || "30",
+    titulo: "",
+    nivel: "Fácil",
+    quantidade: "5",
+    tempoPorQuestao: "30",
   });
 
   const showToast = (
@@ -41,10 +39,6 @@ export const CreateQuizStep1: React.FC = () => {
       return showToast("Dê um nome ao seu quiz!", "error");
     }
 
-    if (!nivel) {
-      return showToast("Selecione um nível de dificuldade!", "error");
-    }
-
     if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
       return showToast(
         "A quantidade de questões deve ser no mínimo 1.",
@@ -60,13 +54,14 @@ export const CreateQuizStep1: React.FC = () => {
       return showToast("O tempo mínimo por questão é de 5 segundos.", "error");
     }
 
-    setConfig({
-      ...currentQuiz?.config,
+    const quizConfig = {
       titulo,
       nivel,
       quantidadeQuestoes: quantidadeNum,
       tempoPorQuestao: tempoNum,
-    });
+    };
+
+    localStorage.setItem("@App:temp_quiz_config", JSON.stringify(quizConfig));
 
     showToast("Configurações salvas!", "success");
 
