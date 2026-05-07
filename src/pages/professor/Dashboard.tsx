@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuiz } from "@/contexts/QuizContext";
 import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 
 export const ProfessorDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { loadQuizzes } = useQuiz();
 
   const [toastConfig, setToastConfig] = useState<{
     message: string | null;
@@ -15,10 +13,6 @@ export const ProfessorDashboard: React.FC = () => {
     message: null,
     variant: "success",
   });
-
-  useEffect(() => {
-    loadQuizzes();
-  }, [loadQuizzes]);
 
   const showToast = (
     message: string,
