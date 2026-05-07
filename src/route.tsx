@@ -6,7 +6,7 @@ import { ProfessorLogin } from "./pages/professor/login";
 import { ProfessorDashboard } from "./pages/professor/dashboard";
 import { CreateQuizStep1 } from "./pages/professor/gerarQuiz";
 import { AboutSection } from "./pages/sobre/sobreCiel";
-import { Home } from "./pages/aluno";
+import { Home } from "./pages/aluno/home";
 
 export const AppRoutes = () => {
   return (
