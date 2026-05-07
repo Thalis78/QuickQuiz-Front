@@ -25,7 +25,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/professor/quiz/criar/etapa-1"
+        path="/professor/quiz/gerar-quiz"
         element={
           <ProtectedRoute>
             <CreateQuizStep1 />
