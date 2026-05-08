@@ -1,9 +1,11 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Instagram, Users, Info } from "lucide-react";
 
 export const Header: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDevPage = location.pathname === "/desenvolvedores";
 
   const handleContactClick = () => {
     window.open("https://www.instagram.com/cielcursos/", "_blank");
@@ -19,7 +21,8 @@ export const Header: React.FC = () => {
           <img src="/Logo.svg" width="80px" alt="Logo" />
         </div>
 
-        <nav className="flex items-center bg-white/10 rounded-2xl p-1 gap-1">
+        {!isDevPage && (
+          <nav className="flex items-center bg-white/10 rounded-2xl p-1 gap-1">
           <button
             onClick={() => navigate("/sobre/ciel")}
             className="flex items-center gap-2 px-3 py-2 text-white hover:bg-white/20 rounded-xl transition-all text-xs font-bold uppercase tracking-wider"
@@ -29,11 +32,11 @@ export const Header: React.FC = () => {
           </button>
 
           <button
-            onClick={() => navigate("/sobre/devs")}
+            onClick={() => navigate("/desenvolvedores")}
             className="flex items-center gap-2 px-3 py-2 text-white hover:bg-white/20 rounded-xl transition-all text-xs font-bold uppercase tracking-wider"
           >
             <Users size={16} />
-            <span className="hidden sm:inline">Devs</span>
+            <span className="hidden sm:inline">Desenvolvedores</span>
           </button>
 
           <div className="w-[1px] h-4 bg-white/20 mx-1" />
@@ -45,7 +48,8 @@ export const Header: React.FC = () => {
             <Instagram size={16} />
             <span>Instagram</span>
           </button>
-        </nav>
+          </nav>
+        )}
       </div>
     </header>
   );
