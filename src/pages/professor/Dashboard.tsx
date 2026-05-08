@@ -61,7 +61,7 @@ export const ProfessorDashboard: React.FC = () => {
             </div>
 
             <button
-              onClick={() => navigate("/professor/quiz/criar/etapa-1")}
+              onClick={() => navigate("/professor/quiz/gerar-quiz")}
               className="w-full sm:w-auto bg-[#FFC000] text-[#605BEF] px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#ffb800] transition duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Gerar Novo Quiz
