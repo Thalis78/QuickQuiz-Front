@@ -4,10 +4,12 @@ import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 import { FormField, FormInput } from "@/components/formComponents";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { createRoom } from "@/api/sala/criar";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [toastConfig, setToastConfig] = useState<{
     message: string | null;
     variant: "success" | "error";
@@ -30,7 +32,7 @@ export const CreateQuizStep1: React.FC = () => {
     setToastConfig({ message, variant });
   };
 
-  const handleProximaEtapa = () => {
+  const handleProximaEtapa = async () => {
     const { titulo, nivel, quantidade, tempoPorQuestao } = formData;
     const quantidadeNum = parseInt(quantidade);
     const tempoNum = parseInt(tempoPorQuestao);
@@ -54,20 +56,30 @@ export const CreateQuizStep1: React.FC = () => {
       return showToast("O tempo mínimo por questão é de 5 segundos.", "error");
     }
 
-    const quizConfig = {
-      titulo,
-      nivel,
-      quantidadeQuestoes: quantidadeNum,
-      tempoPorQuestao: tempoNum,
-    };
+    try {
+      setIsLoading(true);
 
-    localStorage.setItem("@App:temp_quiz_config", JSON.stringify(quizConfig));
+      // Chama o serviço para criar a sala no backend
+      const response = await createRoom({
+        titulo,
+        nivel,
+        quantidade: quantidadeNum,
+        tempo: tempoNum,
+      });
 
-    showToast("Configurações salvas!", "success");
+      showToast("Sala criada com sucesso!", "success");
 
-    setTimeout(() => {
-      navigate("/professor/quiz/criar/etapa-2");
-    }, 800);
+      // Navega para a próxima etapa passando o código da sala gerado
+      setTimeout(() => {
+        navigate("/professor/quiz/criar/etapa-2", {
+          state: { salaCodigo: response.sala_codigo },
+        });
+      }, 800);
+    } catch (error: any) {
+      showToast(error.message || "Erro ao criar sala.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,6 +110,7 @@ export const CreateQuizStep1: React.FC = () => {
               }
               placeholder="Ex: Verb to Be - Practice"
               className="w-full bg-white border-none text-slate-900 text-lg py-6 px-6 rounded-xl shadow-inner"
+              disabled={isLoading}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -107,6 +120,7 @@ export const CreateQuizStep1: React.FC = () => {
                     <button
                       key={op}
                       type="button"
+                      disabled={isLoading}
                       onClick={() => setFormData({ ...formData, nivel: op })}
                       className={`flex-1 py-2.5 rounded-lg text-xs font-black transition-all duration-200 ${
                         formData.nivel === op
@@ -130,6 +144,7 @@ export const CreateQuizStep1: React.FC = () => {
                 min="1"
                 max="20"
                 className="bg-white border-none text-slate-900 py-3 rounded-xl font-bold"
+                disabled={isLoading}
               />
 
               <div className="md:col-span-2 relative">
@@ -145,6 +160,7 @@ export const CreateQuizStep1: React.FC = () => {
                   }
                   min="5"
                   className="bg-white border-none text-[#3E3B7A] py-4 pl-6 pr-16 rounded-xl text-xl font-black"
+                  disabled={isLoading}
                 />
                 <span className="absolute right-4 bottom-3 text-slate-400 font-bold uppercase text-[10px] tracking-widest">
                   Segs
@@ -156,7 +172,8 @@ export const CreateQuizStep1: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigate("/professor/dashboard")}
-                className="group flex items-center gap-2 text-white/60 font-bold hover:text-white transition-all py-2"
+                disabled={isLoading}
+                className="group flex items-center gap-2 text-white/60 font-bold hover:text-white transition-all py-2 disabled:opacity-50"
               >
                 <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
                 <span>Cancelar</span>
@@ -165,10 +182,11 @@ export const CreateQuizStep1: React.FC = () => {
               <button
                 type="button"
                 onClick={handleProximaEtapa}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 text-white border-2 border-white/40 px-12 py-3.5 rounded-full font-black text-lg hover:bg-white hover:text-[#3E3B7A] hover:border-white transition-all active:scale-95"
+                disabled={isLoading}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 text-white border-2 border-white/40 px-12 py-3.5 rounded-full font-black text-lg hover:bg-white hover:text-[#3E3B7A] hover:border-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Próxima Etapa
-                <ChevronRight className="w-5 h-5" />
+                {isLoading ? "Criando..." : "Próxima Etapa"}
+                {!isLoading && <ChevronRight className="w-5 h-5" />}
               </button>
             </div>
           </div>
