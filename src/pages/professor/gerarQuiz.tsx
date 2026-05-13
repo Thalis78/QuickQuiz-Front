@@ -59,7 +59,6 @@ export const CreateQuizStep1: React.FC = () => {
     try {
       setIsLoading(true);
 
-      // Chama o serviço para criar a sala no backend
       const response = await createRoom({
         titulo,
         nivel,
@@ -69,11 +68,8 @@ export const CreateQuizStep1: React.FC = () => {
 
       showToast("Sala criada com sucesso!", "success");
 
-      // Navega para a próxima etapa passando o código da sala gerado
       setTimeout(() => {
-        navigate("/professor/quiz/criar/etapa-2", {
-          state: { salaCodigo: response.sala_codigo },
-        });
+        navigate(`/professor/quiz/sala/${response.sala_codigo}`);
       }, 800);
     } catch (error: any) {
       showToast(error.message || "Erro ao criar sala.", "error");

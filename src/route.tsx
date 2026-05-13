@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/utils/ProtectedRoute";
 
 import Index from "./pages/Index";
 import { CreateQuizStep1 } from "./pages/professor/gerarQuiz";
+import { QuizRoom } from "./pages/professor/Sala";
 import { AboutSection } from "./pages/sobre/sobreCiel";
 import { Home } from "./pages/aluno/home";
 import { ProfessorDashboard } from "./pages/professor/Dashboard";
@@ -26,11 +27,21 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/professor/quiz/gerar-quiz"
         element={
           <ProtectedRoute>
             <CreateQuizStep1 />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/professor/quiz/sala/:codigo"
+        element={
+          <ProtectedRoute>
+            <QuizRoom />
           </ProtectedRoute>
         }
       />
