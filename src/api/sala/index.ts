@@ -78,3 +78,20 @@ export const getRoom = async (codigo: string): Promise<any> => {
 
   return await res.json();
 };
+
+export const enterRoomAsStudent = async (
+  codigo: string,
+  nome: string,
+): Promise<any> => {
+  const res = await fetch(`${BASE_URL}/sala/${codigo}/aluno`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ nome }),
+  });
+
+  if (!res.ok) await handleError(res, "Erro ao tentar entrar na sala.");
+
+  return await res.json();
+};

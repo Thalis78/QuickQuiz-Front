@@ -9,6 +9,7 @@ import { Home } from "./pages/aluno/home";
 import { ProfessorDashboard } from "./pages/professor/Dashboard";
 import { ProfessorLogin } from "./pages/professor/Login";
 import Desenvolvedores from "./pages/dev/Desenvolvedores";
+import { StudentWaitingRoom } from "./pages/aluno/SalaEspera";
 
 export const AppRoutes = () => {
   return (
@@ -17,6 +18,10 @@ export const AppRoutes = () => {
       <Route path="/professor/login" element={<ProfessorLogin />} />
       <Route path="/sobre/ciel" element={<AboutSection />} />
       <Route path="/aluno/home" element={<Home />} />
+      <Route
+        path="/aluno/quiz/sala/espera/:codigo"
+        element={<StudentWaitingRoom />}
+      />
       <Route path="/desenvolvedores" element={<Desenvolvedores />} />
 
       <Route

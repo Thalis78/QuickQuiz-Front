@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { LogIn } from "lucide-react";
 import { Layout } from "@/components/layout";
 import { Toast } from "@/components/toast";
 import { useNavigate } from "react-router-dom";
-
+import { enterRoomAsStudent } from "@/api/sala";
 
 const Home: React.FC = () => {
   const [studentName, setStudentName] = useState("");
@@ -21,28 +20,45 @@ const Home: React.FC = () => {
 
   const showToast = (
     message: string,
-    variant: "success" | "error" = "success"
+    variant: "success" | "error" = "success",
   ) => {
     setToastConfig({ message, variant });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     if (!studentName.trim()) {
       showToast("Por favor, digite seu nome", "error");
-      setIsLoading(false);
       return;
     }
 
     if (!quizCode.trim()) {
       showToast("Por favor, digite o código do quiz", "error");
-      setIsLoading(false);
       return;
     }
 
-    setIsLoading(false);
+    try {
+      setIsLoading(true);
+
+      const alunoInfo = await enterRoomAsStudent(
+        quizCode.trim(),
+        studentName.trim(),
+      );
+
+      showToast(
+        `Bem-vindo(a), ${alunoInfo.nome}! Entrando na sala...`,
+        "success",
+      );
+
+      setTimeout(() => {
+        navigate(`/aluno/quiz/sala/espera/${quizCode.trim()}`);
+      }, 1000);
+    } catch (error: any) {
+      showToast(error.message || "Erro ao tentar entrar na sala.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -56,7 +72,12 @@ const Home: React.FC = () => {
       <main className="flex flex-col items-center justify-center px-4 pt-32 pb-12">
         <div className="w-full max-w-md bg-gray-50 rounded-2xl p-8 border-4 border-[#4441AA] shadow-2xl">
           <div className="flex flex-col items-center mb-8">
-            <img src="https://api.builder.io/api/v1/image/assets/TEMP/025b9c6df2eac5de10d3c632cc91f2c43fc130c9?width=284" width="150px" alt="Logo" className="mb-4" />
+            <img
+              src="https://api.builder.io/api/v1/image/assets/TEMP/025b9c6df2eac5de10d3c632cc91f2c43fc130c9?width=284"
+              width="150px"
+              alt="Logo"
+              className="mb-4"
+            />
             <h2 className="text-3xl font-bold text-[#605BEF] text-center mb-2">
               Hora do desafio!🚀
             </h2>
@@ -99,9 +120,8 @@ const Home: React.FC = () => {
               disabled={isLoading}
               className="w-full mt-10 px-4 py-3 bg-gradient-to-r from-[#605BEF] to-[#4441AA] text-white font-bold rounded-lg hover:from-[#4441AA] hover:to-[#3a35a8] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
             >
-              Começar! <LogIn size={20} />
+              {isLoading ? "Entrando..." : "Começar!"}
             </button>
-
           </form>
 
           <div className="mt-6 text-center">

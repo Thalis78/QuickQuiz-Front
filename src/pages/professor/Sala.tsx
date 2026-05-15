@@ -18,12 +18,12 @@ export const QuizRoom: React.FC = () => {
     quantidade: 0,
     tempo: 0,
     jogadoresConectados: 0,
+    alunosLista: [] as Array<{ nome: string; score: number }>,
   });
 
   useEffect(() => {
     const fetchSala = async () => {
       try {
-        setIsLoading(true);
         const sala = await getRoom(codigo!);
 
         setSalaInfo({
@@ -31,7 +31,8 @@ export const QuizRoom: React.FC = () => {
           nivel: sala.nivel,
           quantidade: sala.quantidadeQuestoes,
           tempo: sala.tempoPorQuestao,
-          jogadoresConectados: 0,
+          jogadoresConectados: sala.alunos ? sala.alunos.length : 0,
+          alunosLista: sala.alunos || [],
         });
       } catch (error: any) {
         setToastMessage(error.message || "Erro ao carregar dados da sala.");
@@ -40,7 +41,15 @@ export const QuizRoom: React.FC = () => {
       }
     };
 
-    if (codigo) fetchSala();
+    if (codigo) {
+      fetchSala();
+
+      const interval = setInterval(() => {
+        fetchSala();
+      }, 2000);
+
+      return () => clearInterval(interval);
+    }
   }, [codigo]);
 
   const copiarCodigo = () => {
@@ -115,17 +124,38 @@ export const QuizRoom: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-[#3E3B7A] rounded-[2.5rem] p-10 border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                <Users className="w-12 h-12 text-white/20" />
-              </div>
-              <h3 className="text-white font-black text-2xl mb-3">
-                Aguardando Alunos...
+            <div className="bg-[#3E3B7A] rounded-[2.5rem] p-10 border border-white/10 shadow-2xl">
+              <h3 className="text-white font-black text-2xl mb-6 text-center sm:text-left">
+                {salaInfo.alunosLista.length === 0
+                  ? "Aguardando Alunos..."
+                  : "Alunos na Sala"}
               </h3>
-              <p className="text-white/50 font-medium max-w-sm">
-                Apartida começará assim que os alunos entrarem usando o código
-                ao lado.
-              </p>
+
+              {salaInfo.alunosLista.length === 0 ? (
+                <div className="flex flex-col items-center justify-center text-center py-6">
+                  <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                    <Users className="w-12 h-12 text-white/20" />
+                  </div>
+                  <p className="text-white/50 font-medium max-w-sm">
+                    A partida começará assim que os alunos entrarem usando o
+                    código ao lado.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2">
+                  {salaInfo.alunosLista.map((aluno, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4 text-white font-bold"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs text-white/70">
+                        {index + 1}
+                      </div>
+                      <span className="truncate text-lg">{aluno.nome}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -147,10 +177,9 @@ export const QuizRoom: React.FC = () => {
             </div>
 
             <button
-              disabled={isLoading}
+              disabled={isLoading || salaInfo.alunosLista.length === 0}
               className="w-full flex items-center justify-center gap-3 bg-green-500 text-white py-7 rounded-[2.5rem] font-black text-2xl shadow-[0_12px_0_rgb(21,128,61)] hover:shadow-[0_6px_0_rgb(21,128,61)] hover:translate-y-[6px] transition-all active:translate-y-[12px] active:shadow-none disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed disabled:translate-y-0"
             >
-              <Play className="w-7 h-7 fill-current" />
               INICIAR AGORA
             </button>
           </div>
