@@ -4,7 +4,7 @@ import { Toast } from "@/components/toast";
 import { Layout } from "@/components/layout";
 import { FormField, FormInput } from "@/components/formComponents";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { createRoom } from "@/api/sala/criar";
+import { createRoom } from "@/api/sala";
 
 export const CreateQuizStep1: React.FC = () => {
   const navigate = useNavigate();

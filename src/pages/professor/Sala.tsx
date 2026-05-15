@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout";
 import { Toast } from "@/components/toast";
 import { Users, Timer, Trophy, Play, Copy, ArrowLeft } from "lucide-react";
+import { getRoom } from "@/api/sala";
 
 export const QuizRoom: React.FC = () => {
   const { codigo } = useParams<{ codigo: string }>();
@@ -23,18 +24,19 @@ export const QuizRoom: React.FC = () => {
     const fetchSala = async () => {
       try {
         setIsLoading(true);
-        setTimeout(() => {
-          setIsLoading(false);
-          setSalaInfo((prev) => ({
-            ...prev,
-            titulo: "Verb to Be - Practice",
-            nivel: "Fácil",
-            quantidade: 10,
-            tempo: 30,
-          }));
-        }, 1000);
-      } catch (error) {
-        setToastMessage("Erro ao carregar dados da sala.");
+        const sala = await getRoom(codigo!);
+
+        setSalaInfo({
+          titulo: sala.titulo,
+          nivel: sala.nivel,
+          quantidade: sala.quantidadeQuestoes,
+          tempo: sala.tempoPorQuestao,
+          jogadoresConectados: 0,
+        });
+      } catch (error: any) {
+        setToastMessage(error.message || "Erro ao carregar dados da sala.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -121,7 +123,7 @@ export const QuizRoom: React.FC = () => {
                 Aguardando Alunos...
               </h3>
               <p className="text-white/50 font-medium max-w-sm">
-                A partida começará assim que os alunos entrarem usando o código
+                Apartida começará assim que os alunos entrarem usando o código
                 ao lado.
               </p>
             </div>

@@ -61,3 +61,20 @@ export const createRoom = async (roomData: CreateRoomData): Promise<any> => {
 
   return await res.json();
 };
+
+export const getRoom = async (codigo: string): Promise<any> => {
+  const token = localStorage.getItem("@App:token");
+
+  const res = await fetch(`${BASE_URL}/sala/${codigo}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok)
+    await handleError(res, `Erro ao tentar buscar a sala ${codigo}.`);
+
+  return await res.json();
+};
